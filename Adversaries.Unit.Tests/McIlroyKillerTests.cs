@@ -48,11 +48,11 @@ namespace Adversaries.Unit.Tests
         [Test]
         public void Compare_SolidToGas_ComparesLow()
         {
-            var killer = new McIlroyKiller(3);
+            var killer = new McIlroyKiller(2);
             List<WrappedInt> data = killer.CurrentData;
-            killer.Compare(data[0], data[1]); // data[0] is now solid
+            killer.Compare(data[0], data[1]); // data[1] is now solid
 
-            int result = killer.Compare(data[0], data[2]);
+            int result = killer.Compare(data[1], data[0]);
 
             Assert.That(result, Is.LessThan(0));
         }
@@ -60,11 +60,11 @@ namespace Adversaries.Unit.Tests
         [Test]
         public void Compare_GasToSolid_ComparesHigh()
         {
-            var killer = new McIlroyKiller(3);
+            var killer = new McIlroyKiller(2);
             List<WrappedInt> data = killer.CurrentData;
-            killer.Compare(data[0], data[1]); // data[0] is now solid
+            killer.Compare(data[0], data[1]); // data[1] is now solid
 
-            int result = killer.Compare(data[2], data[0]);
+            int result = killer.Compare(data[0], data[1]);
 
             Assert.That(result, Is.GreaterThan(0));
         }
