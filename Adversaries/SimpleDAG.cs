@@ -32,6 +32,7 @@ namespace AdversaryExperiments.Adversaries
             while (worklist.Count != 0)
             {
                 int v = worklist.Pop();
+                vertexEpochs[v] = currentEpoch;
                 if (v == target)
                 {
                     return true;
@@ -46,7 +47,6 @@ namespace AdversaryExperiments.Adversaries
             var unvisitedConnected = connectedTo[u].Where(v => vertexEpochs[v] != currentEpoch);
             foreach (int v in unvisitedConnected)
             {
-                vertexEpochs[v] = currentEpoch;
                 worklist.Push(v);
             }
         }
@@ -59,6 +59,7 @@ namespace AdversaryExperiments.Adversaries
             while (worklist.Count != 0)
             {
                 int u = worklist.Pop();
+                vertexEpochs[u] = currentEpoch;
                 ++result;
                 PushUnvisitedConnected(worklist, u);
             }
