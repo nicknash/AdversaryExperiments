@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAGAdversary.cs" />
+    <Compile Include="SimpleDAG.cs" />
     <Compile Include="WrappedInt.cs" />
     <Compile Include="McIlroyKiller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

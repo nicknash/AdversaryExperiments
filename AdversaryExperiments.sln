@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Driver", "Driver\Driver.csproj", "{1C6B0228-6502-4F38-9BF9-20077A1B03FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdversaryExperiments.Driver", "Driver\AdversaryExperiments.Driver.csproj", "{1C6B0228-6502-4F38-9BF9-20077A1B03FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adversaries", "Adversaries\Adversaries.csproj", "{896386F1-1E14-46D6-BF06-91C4D8919A6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdversaryExperiments.Adversaries", "Adversaries\AdversaryExperiments.Adversaries.csproj", "{896386F1-1E14-46D6-BF06-91C4D8919A6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adversaries.Unit.Tests", "Adversaries.Unit.Tests\Adversaries.Unit.Tests.csproj", "{673C2B3A-641C-4B9F-B4C7-6E076E638170}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdversaryExperiments.Adversaries.Unit.Tests", "Adversaries.Unit.Tests\AdversaryExperiments.Adversaries.Unit.Tests.csproj", "{673C2B3A-641C-4B9F-B4C7-6E076E638170}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
