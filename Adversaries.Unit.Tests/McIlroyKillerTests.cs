@@ -10,6 +10,19 @@ namespace Adversaries.Unit.Tests
     [TestFixture]
     public class McIlroyKillerTests
     {
+        [Test]
+        public void Compare_CalledThreeTimes_NumComparisonsIsThree()
+        {
+            var killer = new McIlroyKiller(1);
+            List<WrappedInt> data = killer.CurrentData;
+
+            killer.Compare(data[0], data[0]);
+            killer.Compare(data[0], data[0]);
+            killer.Compare(data[0], data[0]);
+
+            Assert.That(killer.NumComparisons, Is.EqualTo(3));
+        }
+
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
