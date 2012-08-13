@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AdversaryExperiments.Adversaries;
+using System.Diagnostics;
 
 namespace AdversaryExperiments.Driver
 {
@@ -10,15 +11,22 @@ namespace AdversaryExperiments.Driver
     {
         static void Main(string[] args)
         {
-            var killer = new McIlroyKiller(10000);
+            var cmdLine = new CommandLine();
+            if (!cmdLine.TryParse(args, Console.Out))
+            {
+                cmdLine.PrintUsage(Console.Out);
+                return;
+            }
 
-            List<WrappedInt> data = killer.CurrentData;
-
-            data.Sort(killer.Compare);
-
-            Console.WriteLine("numComparisons = {0}", killer.NumComparisons);
-
-            Console.ReadKey();
+            for (int i = 0; i <= cmdLine.NumIncrements; ++i)
+            {
+                int dataSize = cmdLine.StartSize + i * cmdLine.SizeIncrement;
+                var killer = new DAGAdversary(dataSize);
+                var sw = new Stopwatch();
+                sw.Start();
+                killer.CurrentData.Sort(killer.Compare);
+                Console.WriteLine("{0} {1} {2}", dataSize, killer.NumComparisons, sw.Elapsed);
+            }
         }
     }
 }
