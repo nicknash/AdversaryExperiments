@@ -7,7 +7,7 @@ namespace AdversaryExperiments.Adversaries
 {
     public class DAGAdversary
     {
-        private SimpleDAG dag;
+        private IDAG dag;
         private int length;
         public List<WrappedInt> CurrentData { get; private set; }
         public int NumComparisons { get; private set; }
@@ -15,21 +15,20 @@ namespace AdversaryExperiments.Adversaries
         public DAGAdversary(int length)
         {
             this.length = length;
-            Reset();
+            dag = new CachedDAG(length);
+            InitData();
         }
 
-        public DAGAdversary(SimpleDAG initial)
+        public DAGAdversary(IDAG initial)
         {
-            length = initial.NumVerts;
-            Reset();
+            length = initial.NumVerts;            
             dag = initial;
+            InitData();
         }
 
-        private void Reset()
+        private void InitData()
         {
-            NumComparisons = 0;
-            CurrentData = new List<WrappedInt>(Enumerable.Range(0, length).Select(i => new WrappedInt { Value = i }));
-            dag = new SimpleDAG(length);
+            CurrentData = new List<WrappedInt>(Enumerable.Range(0, length).Select(i => new WrappedInt { Value = i }));         
         }
 
         public int Compare(WrappedInt x, WrappedInt y)
@@ -47,8 +46,7 @@ namespace AdversaryExperiments.Adversaries
             {
                 return 1;
             }
-
-            if (dag.NumDescendants(x.Value) < dag.NumDescendants(y.Value))
+            if (dag.CountDescendants(x.Value) < dag.CountDescendants(y.Value))
             {
                 dag.AddEdge(y.Value, x.Value);
                 return 1;

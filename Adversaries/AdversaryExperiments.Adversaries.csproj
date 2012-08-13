@@ -40,7 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CachedDAG.cs" />
     <Compile Include="DAGAdversary.cs" />
+    <Compile Include="IDAG.cs" />
     <Compile Include="SimpleDAG.cs" />
     <Compile Include="WrappedInt.cs" />
     <Compile Include="McIlroyKiller.cs" />
