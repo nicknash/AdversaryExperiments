@@ -164,7 +164,7 @@ namespace AdversaryExperiments.Adversaries
                         }
                         var sense = here == xNode;
                         var otherElement = sense ? y : x;
-                        var other = _elementToNode[sense ? y.Value : x.Value];
+                        var other = _elementToNode[otherElement.Value];
                         switch (other.GetState(NumComparisons))
                         {
                             case Node.VisitState.Unvisited:
