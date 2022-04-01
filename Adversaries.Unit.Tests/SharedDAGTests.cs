@@ -9,7 +9,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
     [TestFixture]
     class SharedDAGTests
     {
-        public IEnumerable<Func<int, IDAG>> DAGFactories
+        public static IEnumerable<Func<int, IDAG>> DAGFactories
         {
             get
             {
@@ -18,7 +18,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             }
         }
 
-        [TestCaseSource("DAGFactories")]
+        [TestCaseSource(nameof(DAGFactories))]
         public void ExistsDirectedPath_FromVertexToItself_ReturnsFalse(Func<int, IDAG> dagFactory)
         {
             IDAG dag = dagFactory(1);
@@ -26,7 +26,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             Assert.False(dag.ExistsDirectedPath(0, 0));
         }
 
-        [TestCaseSource("DAGFactories")]
+        [TestCaseSource(nameof(DAGFactories))]
         public void ExistsDirectedPath_NoEdges_ReturnsFalse(Func<int, IDAG> dagFactory)
         {
             IDAG dag = dagFactory(2);
@@ -34,7 +34,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             Assert.False(dag.ExistsDirectedPath(0, 1));
         }
 
-        [TestCaseSource("DAGFactories")]
+        [TestCaseSource(nameof(DAGFactories))]
         public void ExistsDirectedPath_SingleEdgeCorrectDirection_ReturnsTrue(Func<int, IDAG> dagFactory)
         {
             IDAG dag = dagFactory(2);
@@ -44,7 +44,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             Assert.True(dag.ExistsDirectedPath(0, 1));
         }
 
-        [TestCaseSource("DAGFactories")]
+        [TestCaseSource(nameof(DAGFactories))]
         public void ExistsDirectedPath_SingleEdgeWrongDirection_ReturnsFalse(Func<int, IDAG> dagFactory)
         {
             IDAG dag = dagFactory(2);
@@ -54,7 +54,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             Assert.False(dag.ExistsDirectedPath(1, 0));
         }
 
-        [TestCaseSource("DAGFactories")]
+        [TestCaseSource(nameof(DAGFactories))]
         public void ExistsDirectedPath_TwoEdgesCorrectDirection_ReturnsTrue(Func<int, IDAG> dagFactory)
         {
             IDAG dag = dagFactory(3);
@@ -65,7 +65,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             Assert.True(dag.ExistsDirectedPath(0, 2));
         }
 
-        [TestCaseSource("DAGFactories")]
+        [TestCaseSource(nameof(DAGFactories))]
         public void ExistsDirectedPath_ThreeEdgesCorrectDirection_ReturnsTrue(Func<int, IDAG> dagFactory)
         {
             IDAG dag = dagFactory(4);
@@ -77,7 +77,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             Assert.True(dag.ExistsDirectedPath(0, 3));
         }
 
-        [TestCaseSource("DAGFactories")]
+        [TestCaseSource(nameof(DAGFactories))]
         public void ExistsDirectedPath_ThreeVerticesThreeEdgesNoPath_ReturnsFalse(Func<int, IDAG> dagFactory)
         {
             IDAG dag = dagFactory(3);

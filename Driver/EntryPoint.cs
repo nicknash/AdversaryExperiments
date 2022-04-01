@@ -21,11 +21,11 @@ namespace AdversaryExperiments.Driver
             for (int i = 0; i <= cmdLine.NumIncrements; ++i)
             {
                 int dataSize = cmdLine.StartSize + i * cmdLine.SizeIncrement;
-                var killer = new DAGAdversary(dataSize);
+                var killer = new BrodalAdversary(dataSize);
                 var sw = new Stopwatch();
                 sw.Start();
                 killer.CurrentData.Sort(killer.Compare);
-                Console.WriteLine("{0} {1} {2}", dataSize, killer.NumComparisons, sw.Elapsed);
+                Console.WriteLine($"{dataSize}, {killer.NumComparisons / (dataSize * Math.Log2(dataSize))}, {killer.NumComparisons / (double) (dataSize * dataSize)}, {sw.Elapsed}");
             }
         }
     }
