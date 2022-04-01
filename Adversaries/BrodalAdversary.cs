@@ -1,4 +1,8 @@
-﻿namespace AdversaryExperiments.Adversaries
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace AdversaryExperiments.Adversaries
 {
     // This is Brodal et al.'s adversary from "The Randomized Complexity of Maintaining the Minimum",
     // Nordic Journal of Computing 3(4):337-351, 1996
@@ -26,7 +30,7 @@
     //
     // Now consider sorting against this adversary. When a total ordering of the elements of P has been established, then each of the n elements of P must reside
     // in a leaf-node of the associated binary tree T. Let D be the sum of the depths of all the leaves of T. Each comparison (invocation of the adversary)
-    // increases the depth of at most two elements of P in T by 1, and so each comparison contributes at most 2 to D. Thus, D <= 2*C. 
+    // increases the depth of at most two elements of P in T by 1, and so each comparison contributes at most 2 to D. Thus, D <= 2*C, where C is the number of comparisons performed. 
     // Finally note that in any binary tree of n leaves, D <= nlog2(n) (this fact is easily seen be considering any binary tree as embedded within a complete binary tree).
     // Thus C >= 0.5*nlog2(n)
     //
@@ -47,11 +51,166 @@
     // 
     public class BrodalAdversary
     {
+        class Node
+        {
+            public enum VisitState
+            {
+                Unvisited,
+                Complete,
+                VisitingLeft,
+                VisitingRight
+            }
+
+            private VisitState _state;
+            private long _currentEpoch;
+            private bool _isSentinel;
+            
+            public Node Left { get; private set; }
+            public Node Right { get; private set; }
+
+            public Node(bool isSentinel)
+            {
+                _state = VisitState.Unvisited;
+                _currentEpoch = long.MaxValue;
+                _isSentinel = isSentinel;
+                if (!_isSentinel)
+                {
+                    Left = CreateSentinel();
+                    Right = CreateSentinel();
+                }
+            }
+            
+            public VisitState GetState(long epoch)
+            {
+                if (_isSentinel)
+                {
+                    return VisitState.Complete;
+                }
+                return epoch == _currentEpoch ? _state : VisitState.Unvisited;
+            }
+
+            public void SetState(VisitState state, long epoch)
+            {
+                _state = state;
+                _currentEpoch = epoch;
+            }
+            
+            private static Node CreateSentinel()
+            {
+                var result = new Node(true);
+                return result;
+            }
+
+            public void EnsureInitialized()
+            {
+                if (_isSentinel)
+                {
+                    _isSentinel = false;
+                    Left = CreateSentinel();
+                    Right = CreateSentinel();
+                }
+            }
+        }
+
+        private readonly Node _root;
+        private readonly Node[] _elementToNode;
+        private readonly Stack<Node> _pending;
         
+        public List<WrappedInt> CurrentData { get; }
+        public long NumComparisons { get; private set; }
         
+        public BrodalAdversary(int length)
+        {
+            CurrentData = new List<WrappedInt>(Enumerable.Range(0, length).Select(i => new WrappedInt { Value = i }));
+            _root = new Node(false);
+            _elementToNode = Enumerable.Range(0, length).Select(_ => _root).ToArray();
+            _pending = new Stack<Node>(length);
+        }
+
         public int Compare(WrappedInt x, WrappedInt y)
         {
-            return -1;
+            ++NumComparisons;
+            var xNode = _elementToNode[x.Value];
+            var yNode = _elementToNode[y.Value];
+            if (xNode == yNode)
+            {
+                PushLeft(x);
+                PushRight(y);
+                return -1;
+            }
+            _pending.Clear();
+            _pending.Push(_root);
+            while (_pending.Count > 0)
+            {
+                var here = _pending.Peek();
+                switch (here.GetState(NumComparisons))
+                {
+                    case Node.VisitState.Unvisited:
+                        _pending.Push(here.Left);
+                        here.SetState(Node.VisitState.VisitingLeft, NumComparisons);
+                        break;
+                    case Node.VisitState.VisitingLeft:
+                        _pending.Push(here.Right);
+                        here.SetState(Node.VisitState.VisitingRight, NumComparisons);
+                        break;
+                    case Node.VisitState.VisitingRight:
+                        here.SetState(Node.VisitState.Complete, NumComparisons);
+                        break;
+                    case Node.VisitState.Complete:
+                        _pending.Pop();
+                        if (here != xNode && here != yNode)
+                        {
+                            break;
+                        }
+                        var sense = here == xNode;
+                        var otherElement = sense ? y : x;
+                        var other = _elementToNode[sense ? y.Value : x.Value];
+                        switch (other.GetState(NumComparisons))
+                        {
+                            case Node.VisitState.Unvisited:
+                                // 'other' is unvisited but 'here' is complete, 'here' is less than it (if here == xNode)
+                                return sense ? -1 : 1;
+                            case Node.VisitState.VisitingLeft:
+                                // 'here' is in the left subtree of 'other', move 'other' to its own right child so it's
+                                // no longer an ancestor.
+                                // Hence, 'here' is now less than 'other' (if here == xNode)
+                                PushRight(otherElement);
+                                return sense ? -1 : 1;
+                            case Node.VisitState.VisitingRight:
+                                // 'here' is in the right subtree of 'other', move 'other' to its left child so it's
+                                // no longer an ancestor.
+                                // Hence, 'other' is now less than 'here' (if here == xNode)
+                                PushLeft(otherElement);
+                                return sense ? 1 : -1;
+                            case Node.VisitState.Complete:
+                                // 'other' is completely visited before 'here', i.e. 'other' is less than here (if here == xNode)
+                                return sense ? 1 : -1;
+                            default:
+                                throw new Exception($"TODO");
+                        }
+                    default:
+                        throw new Exception($"TODO");
+                }
+            }
+            throw new Exception($"Unable to determine ordering of {x.Value} and {y.Value}");
+        }
+        
+        private void PushDown(WrappedInt v, Node where)
+        {
+            where.EnsureInitialized();
+            _elementToNode[v.Value] = where;
+        }
+        
+        private void PushLeft(WrappedInt v)
+        {
+            var current = _elementToNode[v.Value];
+            PushDown(v, current.Left);
+        }
+        
+        private void PushRight(WrappedInt v)
+        {
+            var current = _elementToNode[v.Value];
+            PushDown(v, current.Right);
         }
     }
 }
