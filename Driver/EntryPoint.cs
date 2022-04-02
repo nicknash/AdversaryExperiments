@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using AdversaryExperiments.Adversaries;
 using System.Diagnostics;
 
@@ -20,27 +16,34 @@ namespace AdversaryExperiments.Driver
                 return;
             }
 
+            var sorts = new (Action<IAdversary>, string)[]
+            {
+                (adv => adv.CurrentData.Sort(adv.Compare), "List.Sort"), 
+                (TreeSort, "TreeSort")
+            };
             for (int i = 0; i <= cmdLine.NumIncrements; ++i)
             {
                 int dataSize = cmdLine.StartSize + i * cmdLine.SizeIncrement;
-                var adversaries = new IAdversary[] { new RandomAdversary(dataSize), new BrodalAdversary(dataSize), new DAGAdversary(dataSize), new McIlroyKiller(dataSize) };
                 var sw = new Stopwatch();
-                foreach (var adv in adversaries)
+                foreach (var s in sorts)
                 {
-                    sw.Restart();
-                    //adv.CurrentData.Sort(adv.Compare);
-                    TreeSort(adv.CurrentData, adv);
-                    Console.WriteLine($"{dataSize}, {adv.Name}, {adv.NumComparisons / (dataSize * Math.Log2(dataSize)):F5}, {adv.NumComparisons / (double) (dataSize * dataSize):F5}, {sw.Elapsed}");
+                    var adversaries = new IAdversary[] { new RandomAdversary(dataSize), new BrodalAdversary(dataSize), new DAGAdversary(dataSize), new McIlroyKiller(dataSize) };
+                    foreach (var adv in adversaries)
+                    {
+                        sw.Restart();
+                        s.Item1(adv);
+                        Console.WriteLine($"{dataSize}, {s.Item2}, {adv.Name}, {adv.NumComparisons / (dataSize * Math.Log2(dataSize)):F5}, {adv.NumComparisons / (double)(dataSize * dataSize):F5}, {sw.Elapsed}");
+                    }
                 }
             }
         }
 
-        private static void TreeSort(IReadOnlyList<WrappedInt> data, IComparer<WrappedInt> comparer)
+        private static void TreeSort(IAdversary adversary)
         {
-            var tree = new SortedDictionary<WrappedInt, bool>(comparer);
-            foreach (var d in data)
+            var tree = new SortedSet<WrappedInt>(adversary);
+            foreach (var d in adversary.CurrentData)
             {
-                tree.Add(d, true);
+                tree.Add(d);
             }
         }
     }
