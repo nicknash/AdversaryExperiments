@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace AdversaryExperiments.Adversaries
+namespace AdversaryExperiments.Adversaries.Descendants
 {
-    public class DAGAdversary : IAdversary
+    public class DescendantsAdversary : IAdversary
     {
         private readonly IDAG _dag;
 
@@ -13,15 +11,15 @@ namespace AdversaryExperiments.Adversaries
         public List<WrappedInt> CurrentData { get; }
         public long NumComparisons { get; private set; }
 
-        public DAGAdversary(int length) : this(new CachedDAG(length))
+        public DescendantsAdversary(int length) : this(new CachedDAG(length))
         {
         }
 
-        public DAGAdversary(IDAG initial)
+        public DescendantsAdversary(IDAG initial)
         {
             var length = initial.NumVerts;            
             _dag = initial;
-            Name = "DAG";
+            Name = "Desc";
             CurrentData = new List<WrappedInt>(Enumerable.Range(0, length).Select(i => new WrappedInt { Value = i }));
         }
 

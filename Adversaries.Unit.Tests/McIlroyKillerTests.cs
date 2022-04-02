@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using AdversaryExperiments.Adversaries;
+﻿using NUnit.Framework;
 
-namespace Adversaries.Unit.Tests
+namespace AdversaryExperiments.Adversaries
 {
     [TestFixture]
     public class McIlroyKillerTests

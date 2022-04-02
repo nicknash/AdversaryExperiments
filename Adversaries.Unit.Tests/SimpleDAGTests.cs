@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using AdversaryExperiments.Adversaries.Descendants;
 using NUnit.Framework;
 
-namespace AdversaryExperiments.Adversaries.Unit.Tests
+namespace AdversaryExperiments.Adversaries
 {
     [TestFixture]
     class SimpleDAGTests

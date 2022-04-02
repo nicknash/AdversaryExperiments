@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AdversaryExperiments.Adversaries
+namespace AdversaryExperiments.Adversaries.Brodal
 {
     // This is Brodal et al.'s adversary from "The Randomized Complexity of Maintaining the Minimum",
     // Nordic Journal of Computing 3(4):337-351, 1996
@@ -160,65 +160,6 @@ namespace AdversaryExperiments.Adversaries
             PushDown(v, current.Right);
         }
         
-        class Node
-        {
-            public enum VisitState
-            {
-                Unvisited,
-                Complete,
-                VisitingLeft,
-                VisitingRight
-            }
-
-            private VisitState _state;
-            private long _currentEpoch;
-            private bool _isSentinel;
-            
-            public Node Left { get; private set; }
-            public Node Right { get; private set; }
-
-            public Node(bool isSentinel)
-            {
-                _state = VisitState.Unvisited;
-                _currentEpoch = long.MaxValue;
-                _isSentinel = isSentinel;
-                if (!_isSentinel)
-                {
-                    Left = CreateSentinel();
-                    Right = CreateSentinel();
-                }
-            }
-            
-            public VisitState GetState(long epoch)
-            {
-                if (_isSentinel)
-                {
-                    return VisitState.Complete;
-                }
-                return epoch == _currentEpoch ? _state : VisitState.Unvisited;
-            }
-
-            public void SetState(VisitState state, long epoch)
-            {
-                _state = state;
-                _currentEpoch = epoch;
-            }
-            
-            private static Node CreateSentinel()
-            {
-                var result = new Node(true);
-                return result;
-            }
-
-            public void EnsureInitialized()
-            {
-                if (_isSentinel)
-                {
-                    _isSentinel = false;
-                    Left = CreateSentinel();
-                    Right = CreateSentinel();
-                }
-            }
-        }
+ 
     }
 }
