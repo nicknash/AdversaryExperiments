@@ -143,7 +143,8 @@ namespace AdversaryExperiments.Adversaries
             while (_pending.Count > 0)
             {
                 var here = _pending.Peek();
-                switch (here.GetState(NumComparisons))
+                var stateHere = here.GetState(NumComparisons);
+                switch (stateHere)
                 {
                     case Node.VisitState.Unvisited:
                         _pending.Push(here.Left);
@@ -186,7 +187,7 @@ namespace AdversaryExperiments.Adversaries
                                 // 'other' is completely visited before 'here', i.e. 'other' is less than here (if here == xNode)
                                 return sense ? 1 : -1;
                             default:
-                                throw new Exception($"TODO");
+                                throw new Exception($"Unrecognised visit state {stateHere}");
                         }
                     default:
                         throw new Exception($"TODO");
