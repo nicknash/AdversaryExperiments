@@ -4,7 +4,4 @@
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="AdversaryExperiments.Adversaries.csproj.old" />
-  </ItemGroup>
 </Project>
