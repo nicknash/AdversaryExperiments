@@ -1,21 +1,30 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 
 namespace AdversaryExperiments.Adversaries.Unit.Tests
 {
     [TestFixture]
     public class BrodalAdversaryTests
     {
+        private Random _random = new();
+        
         [Test]
-        public void PlaceHolderAddProperTests()
+        public void Compare_FirstComparison_AlwaysSaysLess()
         {
-            var adv = new BrodalAdversary(10);
-            var f = adv.Compare(adv.CurrentData[0], adv.CurrentData[1]);
-            var s = adv.Compare(adv.CurrentData[0], adv.CurrentData[1]);
-            var t = adv.Compare(adv.CurrentData[1], adv.CurrentData[0]);
-
-            Assert.That(f, Is.EqualTo(-1));
-            Assert.That(s, Is.EqualTo(-1));
-            Assert.That(t, Is.EqualTo(1));
+            var n = DontCare(100);
+            var adv = new BrodalAdversary(n);
+            var idx = DontCare(n);
+            var otherIdx = (idx + 1 + DontCare(n - 1)) % n;
+            
+            var r1 = adv.Compare(adv.CurrentData[idx], adv.CurrentData[otherIdx]);
+            var r2 = adv.Compare(adv.CurrentData[idx], adv.CurrentData[otherIdx]);
+            
+            Assert.That(r1, Is.EqualTo(-1));
+            Assert.That(r1, Is.EqualTo(r2));
         }
+        
+        
+
+        int DontCare(int max) => _random.Next(0, max);
     }
 }
