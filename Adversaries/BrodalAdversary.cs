@@ -159,34 +159,34 @@ namespace AdversaryExperiments.Adversaries
                         break;
                     case Node.VisitState.Complete:
                         _pending.Pop();
-                        if (here != xNode && here != yNode)
+                        var hereIsXNode = here == xNode;
+                        if (!hereIsXNode && here != yNode)
                         {
                             break;
                         }
-                        var sense = here == xNode;
-                        var otherElement = sense ? y : x;
+                        var otherElement = hereIsXNode ? y : x;
                         var other = _elementToNode[otherElement.Value];
                         var stateOther = other.GetState(NumComparisons);
                         switch (stateOther)
                         {
                             case Node.VisitState.Unvisited:
                                 // 'other' is unvisited but 'here' is complete, 'here' is less than it (if here == xNode)
-                                return sense ? -1 : 1;
+                                return hereIsXNode ? -1 : 1;
                             case Node.VisitState.VisitingLeft:
                                 // 'here' is in the left subtree of 'other', move 'other' to its own right child so it's
                                 // no longer an ancestor.
                                 // Hence, 'here' is now less than 'other' (if here == xNode)
                                 PushRight(otherElement);
-                                return sense ? -1 : 1;
+                                return hereIsXNode ? -1 : 1;
                             case Node.VisitState.VisitingRight:
                                 // 'here' is in the right subtree of 'other', move 'other' to its left child so it's
                                 // no longer an ancestor.
                                 // Hence, 'other' is now less than 'here' (if here == xNode)
                                 PushLeft(otherElement);
-                                return sense ? 1 : -1;
+                                return hereIsXNode ? 1 : -1;
                             case Node.VisitState.Complete:
                                 // 'other' is completely visited before 'here', i.e. 'other' is less than here (if here == xNode)
-                                return sense ? 1 : -1;
+                                return hereIsXNode ? 1 : -1;
                             default:
                                 throw new Exception($"Unrecognised visit state {stateOther}");
                         }
