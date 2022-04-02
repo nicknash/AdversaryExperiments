@@ -6,6 +6,6 @@ namespace AdversaryExperiments.Adversaries
     {
         string Name { get; }
         long NumComparisons { get; }
-        IReadOnlyList<WrappedInt> CurrentData { get; }
+        List<WrappedInt> CurrentData { get; }
     }
 }

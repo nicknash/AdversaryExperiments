@@ -14,7 +14,7 @@ namespace Adversaries.Unit.Tests
         public void Compare_CalledThreeTimes_NumComparisonsIsThree()
         {
             var killer = new McIlroyKiller(1);
-            List<WrappedInt> data = killer.CurrentData;
+            var data = killer.CurrentData;
 
             killer.Compare(data[0], data[0]);
             killer.Compare(data[0], data[0]);
@@ -30,7 +30,7 @@ namespace Adversaries.Unit.Tests
         {
             var killer = new McIlroyKiller(length);
 
-            List<WrappedInt> result = killer.CurrentData;
+            var result = killer.CurrentData;
 
             Assert.That(result.Count, Is.EqualTo(length));
         }
@@ -39,7 +39,7 @@ namespace Adversaries.Unit.Tests
         public void Compare_GasToGasNoCandidatePivot_ComparesHigh()
         {
             var killer = new McIlroyKiller(2);
-            List<WrappedInt> data = killer.CurrentData;
+            var data = killer.CurrentData;
 
             int result = killer.Compare(data[0], data[1]);
 
@@ -50,7 +50,7 @@ namespace Adversaries.Unit.Tests
         public void Compare_GasToGasLeftOperandIsCandidatePivot_ComparesLow()
         {
             var killer = new McIlroyKiller(3);
-            List<WrappedInt> data = killer.CurrentData;
+            var data = killer.CurrentData;
             killer.Compare(data[0], data[1]);
 
             int result = killer.Compare(data[0], data[2]);
@@ -62,7 +62,7 @@ namespace Adversaries.Unit.Tests
         public void Compare_SolidToGas_ComparesLow()
         {
             var killer = new McIlroyKiller(2);
-            List<WrappedInt> data = killer.CurrentData;
+            var data = killer.CurrentData;
             killer.Compare(data[0], data[1]); // data[1] is now solid
 
             int result = killer.Compare(data[1], data[0]);
@@ -74,7 +74,7 @@ namespace Adversaries.Unit.Tests
         public void Compare_GasToSolid_ComparesHigh()
         {
             var killer = new McIlroyKiller(2);
-            List<WrappedInt> data = killer.CurrentData;
+            var data = killer.CurrentData;
             killer.Compare(data[0], data[1]); // data[1] is now solid
 
             int result = killer.Compare(data[0], data[1]);
@@ -86,7 +86,7 @@ namespace Adversaries.Unit.Tests
         public void Compare_SolidToSolidLeftOperandFrozenFirst_ComparesLow()
         {
             var killer = new McIlroyKiller(4);
-            List<WrappedInt> data = killer.CurrentData;
+            var data = killer.CurrentData;
             killer.Compare(data[1], data[0]); // data[0] is now solid
             killer.Compare(data[3], data[2]); // data[2] is now solid
 
@@ -99,7 +99,7 @@ namespace Adversaries.Unit.Tests
         public void Compare_SolidToSolidRightOperandFrozenFirst_ComparesHigh()
         {
             var killer = new McIlroyKiller(4);
-            List<WrappedInt> data = killer.CurrentData;
+            var data = killer.CurrentData;
             killer.Compare(data[3], data[2]); // data[2] is now solid
             killer.Compare(data[1], data[0]); // data[0] is now solid            
 

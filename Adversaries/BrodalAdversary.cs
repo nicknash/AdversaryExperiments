@@ -55,12 +55,13 @@ namespace AdversaryExperiments.Adversaries
         private readonly Node[] _elementToNode;
         private readonly Stack<Node> _pending;
 
-        public string Name { get; } = "BrodalAdversary";
-        public IReadOnlyList<WrappedInt> CurrentData { get; }
+        public string Name { get; }
+        public List<WrappedInt> CurrentData { get; }
         public long NumComparisons { get; private set; }
         
         public BrodalAdversary(int length)
         {
+            Name = "Brodal";
             CurrentData = new List<WrappedInt>(Enumerable.Range(0, length).Select(i => new WrappedInt { Value = i }));
             _root = new Node(false);
             _elementToNode = Enumerable.Range(0, length).Select(_ => _root).ToArray();

@@ -8,10 +8,9 @@ namespace AdversaryExperiments.Adversaries
     public class DAGAdversary : IAdversary
     {
         private readonly IDAG _dag;
-        private readonly int _length;
 
         public string Name { get; }
-        public IReadOnlyList<WrappedInt> CurrentData { get; }
+        public List<WrappedInt> CurrentData { get; }
         public long NumComparisons { get; private set; }
 
         public DAGAdversary(int length) : this(new CachedDAG(length))
@@ -20,9 +19,10 @@ namespace AdversaryExperiments.Adversaries
 
         public DAGAdversary(IDAG initial)
         {
-            _length = initial.NumVerts;            
+            var length = initial.NumVerts;            
             _dag = initial;
-            CurrentData = new List<WrappedInt>(Enumerable.Range(0, _length).Select(i => new WrappedInt { Value = i }));
+            Name = "DAG";
+            CurrentData = new List<WrappedInt>(Enumerable.Range(0, length).Select(i => new WrappedInt { Value = i }));
         }
 
         public int Compare(WrappedInt x, WrappedInt y)
