@@ -23,13 +23,13 @@ namespace AdversaryExperiments.Driver
             for (int i = 0; i <= cmdLine.NumIncrements; ++i)
             {
                 int dataSize = cmdLine.StartSize + i * cmdLine.SizeIncrement;
-                var adversaries = new IAdversary[] { new BrodalAdversary(dataSize), new DAGAdversary(dataSize), new McIlroyKiller(dataSize) };
+                var adversaries = new IAdversary[] { new RandomAdversary(dataSize), new BrodalAdversary(dataSize), new DAGAdversary(dataSize), new McIlroyKiller(dataSize) };
                 var sw = new Stopwatch();
                 foreach (var adv in adversaries)
                 {
                     sw.Restart();
-                    adv.CurrentData.Sort(adv.Compare);
-                    //TreeSort(adv.CurrentData, adv);
+                    //adv.CurrentData.Sort(adv.Compare);
+                    TreeSort(adv.CurrentData, adv);
                     Console.WriteLine($"{dataSize}, {adv.Name}, {adv.NumComparisons / (dataSize * Math.Log2(dataSize)):F5}, {adv.NumComparisons / (double) (dataSize * dataSize):F5}, {sw.Elapsed}");
                 }
             }
