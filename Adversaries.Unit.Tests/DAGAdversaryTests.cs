@@ -13,7 +13,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
         public void Compare_CalledThreeTimes_NumComparisonsIsThree()
         {
             var dagAdv = new DAGAdversary(1);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             dagAdv.Compare(data[0], data[0]);
             dagAdv.Compare(data[0], data[0]);
@@ -26,7 +26,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
         public void Compare_OperandWithItself_ComparesEqual()
         {
             var dagAdv = new DAGAdversary(1);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             int result = dagAdv.Compare(data[0], data[0]);
 
@@ -37,7 +37,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
         public void Compare_SameOperandsTwice_SameResult()
         {
             var dagAdv = new DAGAdversary(2);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             int firstResult = dagAdv.Compare(data[0], data[1]);
             int secondResult = dagAdv.Compare(data[0], data[1]);
@@ -49,7 +49,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
         public void Compare_NotComparedBefore_CompareLow()
         {
             var dagAdv = new DAGAdversary(2);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             int result = dagAdv.Compare(data[0], data[1]);
 
@@ -60,7 +60,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
         public void Compare_SameOperandOppositeWays_OppositeResults()
         {
             var dagAdv = new DAGAdversary(2);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             int firstToSecond = dagAdv.Compare(data[0], data[1]);
             int secondToFirst = dagAdv.Compare(data[1], data[0]);
@@ -75,7 +75,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             dag.AddEdge(0, 1);
             dag.AddEdge(1, 2);
             var dagAdv = new DAGAdversary(dag);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             int thirdToFirst = dagAdv.Compare(data[2], data[0]);
 
@@ -88,7 +88,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             var dag = new SimpleDAG(3);
             dag.AddEdge(0, 1);
             var dagAdv = new DAGAdversary(dag);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             int result = dagAdv.Compare(data[0], data[2]);
 
@@ -101,7 +101,7 @@ namespace AdversaryExperiments.Adversaries.Unit.Tests
             var dag = new SimpleDAG(3);
             dag.AddEdge(0, 1);
             var dagAdv = new DAGAdversary(dag);
-            List<WrappedInt> data = dagAdv.CurrentData;
+            var data = dagAdv.CurrentData;
 
             int result = dagAdv.Compare(data[2], data[0]);
 

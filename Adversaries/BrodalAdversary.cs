@@ -49,74 +49,14 @@ namespace AdversaryExperiments.Adversaries
     // A comparison of the form 'x < y' is the answered according to the existing mapping I, or a new mapping is produced replacing one of the intervals end-points with
     // its mid-point. 
     // 
-    public class BrodalAdversary
+    public class BrodalAdversary : IAdversary
     {
-        class Node
-        {
-            public enum VisitState
-            {
-                Unvisited,
-                Complete,
-                VisitingLeft,
-                VisitingRight
-            }
-
-            private VisitState _state;
-            private long _currentEpoch;
-            private bool _isSentinel;
-            
-            public Node Left { get; private set; }
-            public Node Right { get; private set; }
-
-            public Node(bool isSentinel)
-            {
-                _state = VisitState.Unvisited;
-                _currentEpoch = long.MaxValue;
-                _isSentinel = isSentinel;
-                if (!_isSentinel)
-                {
-                    Left = CreateSentinel();
-                    Right = CreateSentinel();
-                }
-            }
-            
-            public VisitState GetState(long epoch)
-            {
-                if (_isSentinel)
-                {
-                    return VisitState.Complete;
-                }
-                return epoch == _currentEpoch ? _state : VisitState.Unvisited;
-            }
-
-            public void SetState(VisitState state, long epoch)
-            {
-                _state = state;
-                _currentEpoch = epoch;
-            }
-            
-            private static Node CreateSentinel()
-            {
-                var result = new Node(true);
-                return result;
-            }
-
-            public void EnsureInitialized()
-            {
-                if (_isSentinel)
-                {
-                    _isSentinel = false;
-                    Left = CreateSentinel();
-                    Right = CreateSentinel();
-                }
-            }
-        }
-
         private readonly Node _root;
         private readonly Node[] _elementToNode;
         private readonly Stack<Node> _pending;
-        
-        public List<WrappedInt> CurrentData { get; }
+
+        public string Name { get; } = "BrodalAdversary";
+        public IReadOnlyList<WrappedInt> CurrentData { get; }
         public long NumComparisons { get; private set; }
         
         public BrodalAdversary(int length)
@@ -130,6 +70,10 @@ namespace AdversaryExperiments.Adversaries
         public int Compare(WrappedInt x, WrappedInt y)
         {
             ++NumComparisons;
+            if (x.Value == y.Value)
+            {
+                return 0;
+            }
             var xNode = _elementToNode[x.Value];
             var yNode = _elementToNode[y.Value];
             if (xNode == yNode)
@@ -213,6 +157,67 @@ namespace AdversaryExperiments.Adversaries
         {
             var current = _elementToNode[v.Value];
             PushDown(v, current.Right);
+        }
+        
+        class Node
+        {
+            public enum VisitState
+            {
+                Unvisited,
+                Complete,
+                VisitingLeft,
+                VisitingRight
+            }
+
+            private VisitState _state;
+            private long _currentEpoch;
+            private bool _isSentinel;
+            
+            public Node Left { get; private set; }
+            public Node Right { get; private set; }
+
+            public Node(bool isSentinel)
+            {
+                _state = VisitState.Unvisited;
+                _currentEpoch = long.MaxValue;
+                _isSentinel = isSentinel;
+                if (!_isSentinel)
+                {
+                    Left = CreateSentinel();
+                    Right = CreateSentinel();
+                }
+            }
+            
+            public VisitState GetState(long epoch)
+            {
+                if (_isSentinel)
+                {
+                    return VisitState.Complete;
+                }
+                return epoch == _currentEpoch ? _state : VisitState.Unvisited;
+            }
+
+            public void SetState(VisitState state, long epoch)
+            {
+                _state = state;
+                _currentEpoch = epoch;
+            }
+            
+            private static Node CreateSentinel()
+            {
+                var result = new Node(true);
+                return result;
+            }
+
+            public void EnsureInitialized()
+            {
+                if (_isSentinel)
+                {
+                    _isSentinel = false;
+                    Left = CreateSentinel();
+                    Right = CreateSentinel();
+                }
+            }
         }
     }
 }

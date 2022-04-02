@@ -5,30 +5,24 @@ using System.Text;
 
 namespace AdversaryExperiments.Adversaries
 {
-    public class DAGAdversary
+    public class DAGAdversary : IAdversary
     {
-        private IDAG dag;
-        private int length;
-        public List<WrappedInt> CurrentData { get; private set; }
-        public int NumComparisons { get; private set; }
+        private readonly IDAG _dag;
+        private readonly int _length;
 
-        public DAGAdversary(int length)
+        public string Name { get; }
+        public IReadOnlyList<WrappedInt> CurrentData { get; }
+        public long NumComparisons { get; private set; }
+
+        public DAGAdversary(int length) : this(new CachedDAG(length))
         {
-            this.length = length;
-            dag = new CachedDAG(length);
-            InitData();
         }
 
         public DAGAdversary(IDAG initial)
         {
-            length = initial.NumVerts;            
-            dag = initial;
-            InitData();
-        }
-
-        private void InitData()
-        {
-            CurrentData = new List<WrappedInt>(Enumerable.Range(0, length).Select(i => new WrappedInt { Value = i }));         
+            _length = initial.NumVerts;            
+            _dag = initial;
+            CurrentData = new List<WrappedInt>(Enumerable.Range(0, _length).Select(i => new WrappedInt { Value = i }));
         }
 
         public int Compare(WrappedInt x, WrappedInt y)
@@ -38,20 +32,20 @@ namespace AdversaryExperiments.Adversaries
             {
                 return 0;
             }
-            if (dag.ExistsDirectedPath(x.Value, y.Value))
+            if (_dag.ExistsDirectedPath(x.Value, y.Value))
             {
                 return -1;
             }
-            if (dag.ExistsDirectedPath(y.Value, x.Value))
+            if (_dag.ExistsDirectedPath(y.Value, x.Value))
             {
                 return 1;
             }
-            if (dag.CountDescendants(x.Value) < dag.CountDescendants(y.Value))
+            if (_dag.CountDescendants(x.Value) < _dag.CountDescendants(y.Value))
             {
-                dag.AddEdge(y.Value, x.Value);
+                _dag.AddEdge(y.Value, x.Value);
                 return 1;
             }
-            dag.AddEdge(x.Value, y.Value);
+            _dag.AddEdge(x.Value, y.Value);
             return -1;
         }
     }
