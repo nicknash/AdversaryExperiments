@@ -166,7 +166,8 @@ namespace AdversaryExperiments.Adversaries
                         var sense = here == xNode;
                         var otherElement = sense ? y : x;
                         var other = _elementToNode[otherElement.Value];
-                        switch (other.GetState(NumComparisons))
+                        var stateOther = other.GetState(NumComparisons);
+                        switch (stateOther)
                         {
                             case Node.VisitState.Unvisited:
                                 // 'other' is unvisited but 'here' is complete, 'here' is less than it (if here == xNode)
@@ -187,10 +188,10 @@ namespace AdversaryExperiments.Adversaries
                                 // 'other' is completely visited before 'here', i.e. 'other' is less than here (if here == xNode)
                                 return sense ? 1 : -1;
                             default:
-                                throw new Exception($"Unrecognised visit state {stateHere}");
+                                throw new Exception($"Unrecognised visit state {stateOther}");
                         }
                     default:
-                        throw new Exception($"TODO");
+                        throw new Exception($"Unrecognised visit state {stateHere}");
                 }
             }
             throw new Exception($"Unable to determine ordering of {x.Value} and {y.Value}");
