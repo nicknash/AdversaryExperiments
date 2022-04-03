@@ -49,8 +49,15 @@ namespace AdversaryExperiments.Adversaries.Brodal
     // A comparison of the form 'x < y' is the answered according to the existing mapping I, or a new mapping is produced replacing one of the intervals end-points with
     // its mid-point. 
     // 
+    // The implementation below is a reasonably efficient 'one-pass' realization of the above. Where a single in-order traversal of the tree is made where either the
+    // result of the comparison is resolved, and the tree is updated if necessary. It could be made much more efficient by eliminating the tree traversal by associating
+    // the index in the in-order traversal of an element's associated tree node, where it is known for both elements in the comparison.
     public class BrodalAdversary : IAdversary
     {
+        private const int Equal = 0;
+        private const int Less = -1;
+        private const int Greater = 1;
+        
         private readonly Node _root;
         private readonly Node[] _elementToNode;
         private readonly Stack<Node> _pending;
@@ -73,7 +80,7 @@ namespace AdversaryExperiments.Adversaries.Brodal
             ++NumComparisons;
             if (x.Value == y.Value)
             {
-                return 0;
+                return Equal;
             }
             var xNode = _elementToNode[x.Value];
             var yNode = _elementToNode[y.Value];
@@ -81,7 +88,7 @@ namespace AdversaryExperiments.Adversaries.Brodal
             {
                 PushLeft(x);
                 PushRight(y);
-                return -1;
+                return Less;
             }
             _pending.Clear();
             _pending.Push(_root);
@@ -116,22 +123,22 @@ namespace AdversaryExperiments.Adversaries.Brodal
                         {
                             case Node.VisitState.Unvisited:
                                 // 'other' is unvisited but 'here' is complete, 'here' is less than it (if here == xNode)
-                                return hereIsXNode ? -1 : 1;
+                                return hereIsXNode ? Less : Greater;
                             case Node.VisitState.VisitingLeft:
                                 // 'here' is in the left subtree of 'other', move 'other' to its own right child so it's
                                 // no longer an ancestor.
                                 // Hence, 'here' is now less than 'other' (if here == xNode)
                                 PushRight(otherElement);
-                                return hereIsXNode ? -1 : 1;
+                                return hereIsXNode ? Less : Greater;
                             case Node.VisitState.VisitingRight:
                                 // 'here' is in the right subtree of 'other', move 'other' to its left child so it's
                                 // no longer an ancestor.
                                 // Hence, 'other' is now less than 'here' (if here == xNode)
                                 PushLeft(otherElement);
-                                return hereIsXNode ? 1 : -1;
+                                return hereIsXNode ? Greater : Less;
                             case Node.VisitState.Complete:
                                 // 'other' is completely visited before 'here', i.e. 'other' is less than here (if here == xNode)
-                                return hereIsXNode ? 1 : -1;
+                                return hereIsXNode ? Greater : Less;
                             default:
                                 throw new Exception($"Unrecognised visit state {stateOther}");
                         }
@@ -159,7 +166,5 @@ namespace AdversaryExperiments.Adversaries.Brodal
             var current = _elementToNode[v.Value];
             PushDown(v, current.Right);
         }
-        
- 
     }
 }
