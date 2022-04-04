@@ -7,6 +7,15 @@ namespace AdversaryExperiments.Adversaries.Brodal
     // This is Brodal et al.'s adversary from "The Randomized Complexity of Maintaining the Minimum",
     // Nordic Journal of Computing 3(4):337-351, 1996
     //
+    // In fact, it appears this adversary has been discovered independently quite a few times. It is described
+    // by Borodin, Guibas, Lynch and Yao at the end of "Efficient Searching Using Partial Ordering", 
+    // Information Processing Letters, 12:(2),pp71-75, 1980
+    //
+    // It was also discovered independently in Richards and Vaidya 
+    // "On the Distribution of Comparisons in Sorting Algorithms" BIT(28),pp764-774, 1988
+    // where they cite an unpublished 1979 manuscript of Lynch (of the preceding IPL paper).
+    //
+    //
     // The description given by Brodal et al. represents the partial order, P, via a function V that maps
     // elements of the partial order to nodes in a binary tree, T
     //
