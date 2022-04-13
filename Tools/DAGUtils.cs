@@ -6,7 +6,7 @@ namespace AdversaryExperiments.Tools
 
         public static IReadOnlyList<IReadOnlyList<int>> GetVertexToEdgesOut(IReadOnlyList<Edge> edges)
         {
-            var numVerts = edges.Select(e => Math.Max(e.Source, e.Target)).Max() + 1;
+            var numVerts = GetNumVertices(edges);
             var vertexToEdgesOut = Enumerable.Range(0, numVerts).Select(_ => new List<int>()).ToList();
             foreach(var e in edges)
             {
@@ -14,6 +14,9 @@ namespace AdversaryExperiments.Tools
             }
             return vertexToEdgesOut;
         }
+
+        // This function assumes the vertex numbers are contiguous
+        public static int GetNumVertices(IReadOnlyList<Edge> edges) => edges.Select(e => Math.Max(e.Source, e.Target)).Max() + 1;
     }
 
 }
