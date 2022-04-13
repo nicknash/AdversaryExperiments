@@ -6,10 +6,9 @@ namespace AdversaryExperiments.Tools
 {
     public class TopologicalSort
     {
-        readonly record struct Choice(int VertexNumber, IReadOnlyList<int> EndPointsOfDeletedEdges);
+        private readonly record struct Choice(int VertexNumber, IReadOnlyList<int> EndPointsOfDeletedEdges);
         
-
-        public static void GetAllSorts(IReadOnlyList<IReadOnlyList<int>> vertexToEdgesOut)
+        public static IEnumerable<IReadOnlyList<int>> GetAllSorts(IReadOnlyList<IReadOnlyList<int>> vertexToEdgesOut)
         {
             int numVertices = vertexToEdgesOut.Count;
             var vertexToNumEdgesIn = new int[numVertices];
@@ -21,7 +20,6 @@ namespace AdversaryExperiments.Tools
                     ++vertexToNumEdgesIn[v];
                 }
             }
-            
    
             var isProcessed = new bool[numVertices];
             var pendingVertices = new Stack<List<int>>();
@@ -29,12 +27,8 @@ namespace AdversaryExperiments.Tools
             pendingVertices.Push(initialVertices);
             var thisSort = new List<Choice>();
 
-            int numSorts = 0;
             while(pendingVertices.Count != 0) 
             {
-                //var stack = String.Join(",", pendingVertices.Select(list => $"[{String.Join(',', list)}]"));
-
-                //Console.WriteLine($"STACK is {stack}");
                 var possibleVertices = pendingVertices.Peek();
                 if(possibleVertices.Count == 0)
                 {
@@ -65,9 +59,8 @@ namespace AdversaryExperiments.Tools
                 }
                 if(thisSort.Count == numVertices)
                 {
-                    var sortStr = String.Join(",", thisSort.Select(c => c.VertexNumber.ToString()));
-                    ++numSorts;
-                    Console.WriteLine($"TOPOLOGICAL SORT [{numSorts}]: {sortStr}");
+                    yield return thisSort.Select(c => c.VertexNumber).ToList();
+
                     var lastChoice = thisSort[thisSort.Count - 1];
                     foreach(var v in lastChoice.EndPointsOfDeletedEdges)
                     {
