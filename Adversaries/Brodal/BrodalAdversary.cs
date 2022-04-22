@@ -87,12 +87,12 @@ namespace AdversaryExperiments.Adversaries.Brodal
         public int Compare(WrappedInt x, WrappedInt y)
         {
             ++NumComparisons;
-            if (x.Value == y.Value)
+            if (x == y)
             {
                 return Equal;
             }
-            var xNode = _elementToNode[x.Value];
-            var yNode = _elementToNode[y.Value];
+            var xNode = GetNode(x);
+            var yNode = GetNode(y);
             if (xNode == yNode)
             {
                 PushLeft(x);
@@ -126,7 +126,7 @@ namespace AdversaryExperiments.Adversaries.Brodal
                             break;
                         }
                         var otherElement = hereIsXNode ? y : x;
-                        var other = _elementToNode[otherElement.Value];
+                        var other = GetNode(otherElement);
                         var stateOther = other.GetState(NumComparisons);
                         switch (stateOther)
                         {
@@ -158,6 +158,8 @@ namespace AdversaryExperiments.Adversaries.Brodal
             throw new Exception($"Unable to determine ordering of {x.Value} and {y.Value}");
         }
         
+        private Node GetNode(WrappedInt x) => _elementToNode[x.Value];
+
         private void PushDown(WrappedInt v, Node where)
         {
             where.EnsureInitialized();
@@ -166,13 +168,13 @@ namespace AdversaryExperiments.Adversaries.Brodal
         
         private void PushLeft(WrappedInt v)
         {
-            var current = _elementToNode[v.Value];
+            var current = GetNode(v);
             PushDown(v, current.Left);
         }
         
         private void PushRight(WrappedInt v)
         {
-            var current = _elementToNode[v.Value];
+            var current = GetNode(v);
             PushDown(v, current.Right);
         }
     }
