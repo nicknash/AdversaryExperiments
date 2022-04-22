@@ -60,7 +60,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     }
                 }
             }
-            else
+            //else
             {
                 // TODO: The ordering is already defined, return it.
 
