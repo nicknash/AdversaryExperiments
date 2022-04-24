@@ -73,15 +73,8 @@ namespace AdversaryExperiments.Adversaries.Zamir
                         // In this diagram 'T2' is a central node, and p and q could not be split to reside in I1 and I2,
                         // as a subsequent move could conceivably send them both to T2, which is inconsistent with p < q.
                         //
-                        // The potential consistent destinations of p and q are:
-                        //
-                        // x in  | y in 
-                        // ------|------
-                        //  I1   |  T3
-                        //  T1   |  T2
-                        //  T1   |  I2 
-                        //  T1   |  T3
-                        //  T2   |  T3
+                        var result = xIsAncestor ? SplitPair(xPair, y) : SplitPair(yPair, x);
+                        return result;
                     }
                     else
                     {
@@ -99,29 +92,65 @@ namespace AdversaryExperiments.Adversaries.Zamir
             }
         }
 
+        private int SplitPair((WrappedInt, WrappedInt) pairInAncestor, WrappedInt descendant)
+        {
+            var (p, q) = pairInAncestor;
+            //    (p,q)
+            //    /   \
+            //   I1    I2
+            //  /  \ /  \
+            // T1  T2   T3
+            //
+            // The potential consistent destinations of p and q with respect to descendant are
+            //
+            // p in  | q in | description 
+            // ------|------|
+            //  I1   |  T3  | p left once, q right twice
+            //  T1   |  T2  | p left twice, q right-then-left
+            //  T1   |  I2  | p left twice, q right once
+            //  T1   |  T3  | 
+            //  T2   |  T3  |
+            
+            if(CanPushLeft(p, descendant) && CanPushTwiceRight(q, descendant))
+            {
+
+            }
+            
+            return -1;
+        }
+
         private int PushDown(WrappedInt ancestor, WrappedInt descendant)
         {
             if(CanPushLeft(ancestor, descendant))
             {
+                PushLeft(ancestor);
                 return Less;
             }
             else if(CanPushRight(ancestor, descendant))
             {
+                PushRight(ancestor);
                 return Greater;
             }
             else
             {
                 if(CanPushTwiceLeft(ancestor, descendant))
                 {
+                    PushLeft(ancestor);
+                    PushLeft(ancestor);
                     return Less;
                 }
                 if(CanPushTwiceRight(ancestor, descendant))
                 {
+                    PushRight(ancestor);
+                    PushRight(ancestor);
                     return Greater;
                 }
                 throw new Exception($"Should never happen: Cannot resolve comparison of two unpaired elements in distinct nodes.");
             }
         }
+
+        private void PushLeft(WrappedInt n) => throw new Exception($"Handle sentinels and update the mapping");
+        private void PushRight(WrappedInt n) => throw new Exception($"Handle sentinels and update the mapping");
 
         private int OtherSense(int r)
          => r switch 
@@ -133,12 +162,16 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
         private Node GetNode(WrappedInt v) => throw new Exception("TODO1");
 
-        private bool TryGetPair(WrappedInt v, out WrappedInt w) => throw new Exception("TODO2");
+        private bool TryGetPair(WrappedInt v, out (WrappedInt, WrappedInt) p) => throw new Exception("TODO2");
 
         private bool ExistsPath(WrappedInt x, WrappedInt y) => throw new Exception("TODO3");
 
         private bool ExistsPath(Node x, Node y) => throw new Exception($"TODO4");
  
+        private bool Connected(Node x, Node y) => throw new Exception("TODO");
+
+        private bool Ordered(Node x, Node y) => throw new Exception("TODO"); 
+
         private bool CanPushLeft(Node x, Node y) => !ExistsPath(x.Left, y) && !ExistsPath(y, x.Left);
         private bool CanPushRight(Node x, Node y) => throw new Exception($"TODO");
 
