@@ -45,21 +45,49 @@ namespace AdversaryExperiments.Adversaries.Zamir
             {
                 if (inSameNode)
                 {
+                    if(!isXPaired && !isYPaired)
+                    {
+
+                    }
                     // Handle the pairing cases (can I devise a little algorithm that makes them
                     // a special case of the distinct node pairs cases?)
 
                 }
                 else
                 {
-                    if (!isXPaired && !isYPaired)
+                    var isAncestorPaired = xIsAncestor && isXPaired || yIsAncestor && isYPaired;
+                    if(isAncestorPaired)
+                    {
+                        // In this case, we need to split a pair in an ancestor node.
+                        // Since pairing only occurs in tree nodes and not intermediate nodes
+                        // the ancestor with the pair must be a tree node.
+                        // Splitting a pair correctly means that at most one element of the pair
+                        // can reside at an intermediate node after this split. Otherwise, a subsequent move
+                        // could send them both to a 'central' node. That is, consider the pair (p, q): 
+                        //    (p,q)
+                        //    /   \
+                        //   I1    I2
+                        //  /  \ /  \
+                        // T1  T2   T3
+                        //
+                        // In this diagram 'T2' is a central node, and p and q could not be split to reside in I1 and I2,
+                        // as a subsequent move could conceivably send them both to T2, which is inconsistent with p < q.
+                        //
+                        // The potential consistent destinations of p and q are:
+                        //
+                        // x in  | y in 
+                        // ------|------
+                        //  I1   |  T3
+                        //  T1   |  T2
+                        //  T1   |  I2 
+                        //  T1   |  T3
+                        //  T2   |  T3
+                    }
+                    else
                     {
                         // These are the 'minimal push down' case of the ancestor
                         var result = xIsAncestor ? PushDown(x, y) : OtherSense(PushDown(y, x));
                         return result;
-                    }
-                    else
-                    {
-                        // Somewhat complicated cases I need to go through here.
                     }
                 }
             }
