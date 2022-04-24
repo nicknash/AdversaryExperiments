@@ -46,7 +46,6 @@ namespace AdversaryExperiments.Adversaries.Zamir
             var isXPaired = TryGetPair(x, out var xPair);
             var isYPaired = TryGetPair(y, out var yPair);
 
-
             if (requiresClassification)
             {
                 if (inSameNode)
@@ -67,11 +66,19 @@ namespace AdversaryExperiments.Adversaries.Zamir
                                 throw new Exception($"Unexpected {nameof(Node.NodeType)} {node.Type}");
                         }
                     }
+                    else if (!isXPaired && isYPaired)
+                    {
+                        return OtherSense(ComparePairToSingleton(yPair, y, x));
+                    }
+                    else if (isXPaired && !isYPaired)
+                    {
+                        return ComparePairToSingleton(xPair, x, y);
+                    }
                     else
                     {
-                        // Handle the pairing cases (can I devise a little algorithm that makes them
-                        // a special case of the distinct node pairs cases?)
+
                     }
+                    throw new Exception($"Should never happen: Did not resolve same node comparison.");
                 }
                 else
                 {
@@ -104,21 +111,33 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     }
                 }
             }
-            //else
-            {
-                // TODO: The ordering is already defined, return it.
-
-                return -1;
-            }
+            throw new NotImplementedException($"The ordering between {x.Value} and {y.Value} is already defined, but this is not implemented yet.");
         }
 
-        private void CreatePair(WrappedInt x, WrappedInt y)
+        private int ComparePairToSingleton((WrappedInt, WrappedInt) pair, WrappedInt x, WrappedInt y)
         {
-            throw new NotImplementedException();
+            DestroyPair(pair);
+            var (p, q) = pair;
+            if (x == p)
+            {
+                Push(p, Direction.Left, Direction.Left);
+                Push(q, Direction.Right);
+                Push(y, Direction.Right);
+                return Less;
+            }
+            else if (x == q)
+            {
+                Push(p, Direction.Left);
+                Push(q, Direction.Right, Direction.Right);
+                Push(y, Direction.Left);
+                return Greater;
+            }
+            throw new Exception($"Should never happen: exhaustiveness check on pairing");
         }
 
         private int PushDownPair((WrappedInt, WrappedInt) pairInAncestor, WrappedInt descendant)
         {
+            DestroyPair(pairInAncestor);
             var (p, q) = pairInAncestor;
             //    (p,q)
             //    /   \
@@ -200,7 +219,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
         private void Push(WrappedInt n, params Direction[] directions) => throw new Exception($"Handle sentinels and update the mapping");
 
-        private int OtherSense(int r)
+        private static int OtherSense(int r)
          => r switch 
          {
              Greater => Less,
@@ -210,28 +229,23 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
         private Node GetNode(WrappedInt v) => throw new Exception("TODO1");
 
-        private bool TryGetPair(WrappedInt v, out (WrappedInt, WrappedInt) p) => throw new Exception("TODO2");
-
         private bool ExistsPath(WrappedInt x, WrappedInt y) => throw new Exception("TODO3");
 
         private bool ExistsPath(Node x, Node y) => throw new Exception($"TODO4");
- 
-        private bool Connected(Node x, Node y) => throw new Exception("TODO");
 
-        private bool Ordered(Node x, Node y) => throw new Exception("TODO"); 
+        private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) 
+        => throw new Exception($"Verify no directed path directions(x) -> y and no directed path y -> directions(x)");
 
-        private bool CanPushLeft(Node x, Node y) => !ExistsPath(x.Left, y) && !ExistsPath(y, x.Left);
-        private bool CanPushRight(Node x, Node y) => throw new Exception($"TODO");
+        private bool TryGetPair(WrappedInt v, out (WrappedInt, WrappedInt) p) => throw new Exception("TODO2");
 
-        private bool CanPushLeft(WrappedInt x, WrappedInt y) => CanPushLeft(GetNode(x), GetNode(y));
+        private void CreatePair(WrappedInt x, WrappedInt y)
+        {
+            throw new NotImplementedException();
+        }
 
-        private bool CanPushTwiceLeft(WrappedInt x, WrappedInt y) => CanPushLeft(GetNode(x).Left, GetNode(y));
-
-        private bool CanPushRight(WrappedInt x, WrappedInt y) => throw new Exception($"TODO");
-
-        private bool CanPushTwiceRight(WrappedInt x, WrappedInt y) => throw new Exception($"TODO");
-
-        private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) => throw new Exception($"TODO");
-
+        private void DestroyPair((WrappedInt, WrappedInt) pair)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
