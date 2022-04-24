@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Adversaries\AdversaryExperiments.Adversaries.csproj" />
+    <ProjectReference Include="..\Tools\AdversaryExperiments.Tools.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NDesk.Options" Version="0.2.1" />
