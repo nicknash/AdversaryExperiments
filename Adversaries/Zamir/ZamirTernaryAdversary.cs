@@ -72,13 +72,13 @@ namespace AdversaryExperiments.Adversaries.Zamir
                         // In this diagram 'T2' is a central node, and p and q could not be split to reside in I1 and I2,
                         // as a subsequent move could conceivably send them both to T2, which is inconsistent with p < q.
                         //
-                        var result = xIsAncestor ? SplitPair(xPair, y) : SplitPair(yPair, x);
+                        var result = xIsAncestor ? PushDownPair(xPair, y) : PushDownPair(yPair, x);
                         return result;
                     }
                     else
                     {
                         // These are the 'minimal push down' case of the ancestor
-                        var result = xIsAncestor ? PushDown(x, y) : OtherSense(PushDown(y, x));
+                        var result = xIsAncestor ? PushDownSingle(x, y) : OtherSense(PushDownSingle(y, x));
                         return result;
                     }
                 }
@@ -91,7 +91,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
             }
         }
 
-        private int SplitPair((WrappedInt, WrappedInt) pairInAncestor, WrappedInt descendant)
+        private int PushDownPair((WrappedInt, WrappedInt) pairInAncestor, WrappedInt descendant)
         {
             var (p, q) = pairInAncestor;
             //    (p,q)
@@ -109,60 +109,70 @@ namespace AdversaryExperiments.Adversaries.Zamir
             //  T1   |  I2  | p left twice, q right once
             //  T1   |  T3  | p left twice, q right twice
             //  T2   |  T3  | p left-right, q right twice
+            //
             bool CanPushP(params Direction[] where) => CanPush(p, descendant, where);
             bool CanPushQ(params Direction[] where) => CanPush(q, descendant, where);
 
-
             if(CanPushP(Direction.Left) && CanPushQ(Direction.Right, Direction.Right))
             {
+                Push(p, Direction.Left);
+                Push(q, Direction.Right, Direction.Right);
             }
             else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right, Direction.Left))
             {
-
+                Push(p, Direction.Left, Direction.Left);
+                Push(q, Direction.Right, Direction.Left);
             }
+            else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right))
+            {
+                Push(p, Direction.Left, Direction.Left);
+                Push(q, Direction.Right, Direction.Right);
+            }           
             else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right, Direction.Right))
             {
-
+                Push(p, Direction.Left, Direction.Left);
+                Push(q, Direction.Right, Direction.Right);
             }
             else if(CanPushP(Direction.Left, Direction.Right) && CanPushQ(Direction.Right, Direction.Right))
             {
-
+                Push(p, Direction.Left, Direction.Right);
+                Push(q, Direction.Right, Direction.Right);
             }
-            throw new Exception($"Cannot define order! TODO put proper message here");
+            throw new Exception($"Should never happen: Cannot resolve order when splitting ancestor pair");
         }
 
-        private int PushDown(WrappedInt ancestor, WrappedInt descendant)
+        private int PushDownSingle(WrappedInt ancestor, WrappedInt descendant)
         {
-            if(CanPushLeft(ancestor, descendant))
+            bool CanPushAncestor(params Direction[] directions) => CanPush(ancestor, descendant, directions);
+            void PushAncestor(params Direction[] directions) => Push(ancestor, directions);
+            
+            if(CanPushAncestor(Direction.Left))
             {
-                PushLeft(ancestor);
+                PushAncestor(Direction.Left);
                 return Less;
             }
-            else if(CanPushRight(ancestor, descendant))
+            else if(CanPushAncestor(Direction.Right))
             {
-                PushRight(ancestor);
+                PushAncestor(Direction.Right);
                 return Greater;
             }
             else
             {
-                if(CanPushTwiceLeft(ancestor, descendant))
+                if(CanPushAncestor(Direction.Left, Direction.Left))
                 {
-                    PushLeft(ancestor);
-                    PushLeft(ancestor);
+                    PushAncestor(Direction.Left, Direction.Left);
                     return Less;
                 }
-                if(CanPushTwiceRight(ancestor, descendant))
+                if(CanPushAncestor(Direction.Right, Direction.Right))
                 {
-                    PushRight(ancestor);
-                    PushRight(ancestor);
+                    PushAncestor(Direction.Right, Direction.Right);
                     return Greater;
                 }
                 throw new Exception($"Should never happen: Cannot resolve comparison of two unpaired elements in distinct nodes.");
             }
         }
 
-        private void PushLeft(WrappedInt n) => throw new Exception($"Handle sentinels and update the mapping");
-        private void PushRight(WrappedInt n) => throw new Exception($"Handle sentinels and update the mapping");
+        private void Push(WrappedInt n, params Direction[] directions) => throw new Exception($"Handle sentinels and update the mapping");
 
         private int OtherSense(int r)
          => r switch 
