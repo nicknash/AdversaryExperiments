@@ -9,7 +9,6 @@ namespace AdversaryExperiments.Adversaries.Zamir
         private const int Equal = 0;
         private const int Less = -1;
         private const int Greater = 1;
-   
         public string Name { get; }
         public long NumComparisons { get; private set; }
         public List<WrappedInt> CurrentData { get; }
@@ -108,15 +107,28 @@ namespace AdversaryExperiments.Adversaries.Zamir
             //  I1   |  T3  | p left once, q right twice
             //  T1   |  T2  | p left twice, q right-then-left
             //  T1   |  I2  | p left twice, q right once
-            //  T1   |  T3  | 
-            //  T2   |  T3  |
-            
-            if(CanPushLeft(p, descendant) && CanPushTwiceRight(q, descendant))
+            //  T1   |  T3  | p left twice, q right twice
+            //  T2   |  T3  | p left-right, q right twice
+            bool CanPushP(params Direction[] where) => CanPush(p, descendant, where);
+            bool CanPushQ(params Direction[] where) => CanPush(q, descendant, where);
+
+
+            if(CanPushP(Direction.Left) && CanPushQ(Direction.Right, Direction.Right))
+            {
+            }
+            else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right, Direction.Left))
             {
 
             }
-            
-            return -1;
+            else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right, Direction.Right))
+            {
+
+            }
+            else if(CanPushP(Direction.Left, Direction.Right) && CanPushQ(Direction.Right, Direction.Right))
+            {
+
+            }
+            throw new Exception($"Cannot define order! TODO put proper message here");
         }
 
         private int PushDown(WrappedInt ancestor, WrappedInt descendant)
@@ -183,6 +195,13 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
         private bool CanPushTwiceRight(WrappedInt x, WrappedInt y) => throw new Exception($"TODO");
 
+        enum Direction
+        {
+            Left,
+            Right
+        }
+
+        private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) => throw new Exception($"TODO");
 
     }
 }
