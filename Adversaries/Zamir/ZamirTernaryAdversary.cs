@@ -9,6 +9,13 @@ namespace AdversaryExperiments.Adversaries.Zamir
         private const int Equal = 0;
         private const int Less = -1;
         private const int Greater = 1;
+        
+        enum Direction
+        {
+            Left,
+            Right
+        }
+
         public string Name { get; }
         public long NumComparisons { get; private set; }
         public List<WrappedInt> CurrentData { get; }
@@ -44,13 +51,27 @@ namespace AdversaryExperiments.Adversaries.Zamir
             {
                 if (inSameNode)
                 {
+                    var node = GetNode(x);
                     if(!isXPaired && !isYPaired)
                     {
-
+                        switch(node.Type)
+                        {
+                            case Node.NodeType.Tree:
+                                CreatePair(x, y);
+                                return Less;
+                            case Node.NodeType.Intermediate:
+                                Push(x, Direction.Left);
+                                Push(y, Direction.Right);
+                                return Less;
+                            default:
+                                throw new Exception($"Unexpected {nameof(Node.NodeType)} {node.Type}");
+                        }
                     }
-                    // Handle the pairing cases (can I devise a little algorithm that makes them
-                    // a special case of the distinct node pairs cases?)
-
+                    else
+                    {
+                        // Handle the pairing cases (can I devise a little algorithm that makes them
+                        // a special case of the distinct node pairs cases?)
+                    }
                 }
                 else
                 {
@@ -70,7 +91,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
                         // T1  T2   T3
                         //
                         // In this diagram 'T2' is a central node, and p and q could not be split to reside in I1 and I2,
-                        // as a subsequent move could conceivably send them both to T2, which is inconsistent with p < q.
+                        // because subsequent moves could conceivably send them both to T2, which is inconsistent with p < q.
                         //
                         var result = xIsAncestor ? PushDownPair(xPair, y) : PushDownPair(yPair, x);
                         return result;
@@ -89,6 +110,11 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
                 return -1;
             }
+        }
+
+        private void CreatePair(WrappedInt x, WrappedInt y)
+        {
+            throw new NotImplementedException();
         }
 
         private int PushDownPair((WrappedInt, WrappedInt) pairInAncestor, WrappedInt descendant)
@@ -126,7 +152,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
             else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right))
             {
                 Push(p, Direction.Left, Direction.Left);
-                Push(q, Direction.Right, Direction.Right);
+                Push(q, Direction.Right);
             }           
             else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right, Direction.Right))
             {
@@ -204,12 +230,6 @@ namespace AdversaryExperiments.Adversaries.Zamir
         private bool CanPushRight(WrappedInt x, WrappedInt y) => throw new Exception($"TODO");
 
         private bool CanPushTwiceRight(WrappedInt x, WrappedInt y) => throw new Exception($"TODO");
-
-        enum Direction
-        {
-            Left,
-            Right
-        }
 
         private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) => throw new Exception($"TODO");
 
