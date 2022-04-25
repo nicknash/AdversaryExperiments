@@ -18,19 +18,22 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
 
         private readonly Node[] _elementToNode;
+        private readonly (WrappedInt, WrappedInt)[] _elementToPair;
+
 
         public string Name { get; }
         public long NumComparisons { get; private set; }
         public List<WrappedInt> CurrentData { get; }
 
-        private Node _root;
+        private readonly Node _root;
 
         public ZamirTernaryAdversary(int size)
         {
             Name = "Zamir3";
             CurrentData = new List<WrappedInt>(Enumerable.Range(0, size).Select(i => new WrappedInt { Value = i }));
             _root = Node.CreateUnit();
-            _elementToNode = Enumerable.Range(0 , size).Select(_ => _root).ToArray();
+            _elementToNode = Enumerable.Range(0, size).Select(_ => _root).ToArray();
+            _elementToPair = new (WrappedInt, WrappedInt)[size];
         }
         
         public int Compare(WrappedInt x, WrappedInt y)
@@ -301,16 +304,38 @@ namespace AdversaryExperiments.Adversaries.Zamir
             return ExistsPath(here.Left, target) || ExistsPath(here.Right, target);
         }
 
-        private bool TryGetPair(WrappedInt v, out (WrappedInt, WrappedInt) p) => throw new Exception("TODO2");
-
-        private void CreatePair(WrappedInt x, WrappedInt y)
+        private bool TryGetPair(WrappedInt v, out (WrappedInt, WrappedInt) p) 
         {
-            throw new NotImplementedException();
+            p = _elementToPair[v.Value];
+            return p != (null, null);
+        }
+
+        private void CreatePair(WrappedInt first, WrappedInt second)
+        {
+            if(_elementToPair[first.Value] != (null, null))
+            {
+                throw new Exception($"Cannot create pair: pair already exists for {first.Value}");
+            }
+            if(_elementToPair[second.Value] != (null, null))
+            {
+                throw new Exception($"Cannot create pair: pair already exists for {second.Value}");
+            }
+            _elementToPair[first.Value] = (first, second);
+            _elementToPair[second.Value] = (first, second);
         }
 
         private void DestroyPair((WrappedInt, WrappedInt) pair)
         {
-            throw new NotImplementedException();
+            var (x, y) = (pair.Item1.Value, pair.Item2.Value);
+            if(_elementToPair[x] == (null, null))
+            {
+                throw new Exception($"Cannot destroy pair: pair does not exist for {x}");
+            }
+            if(_elementToPair[y] == (null, null))
+            {
+                throw new Exception($"Cannot destroy pair: pair does not exist for {y}");
+            }
+            _elementToPair[x] = _elementToPair[y] = (null, null);
         }
         
         private static int OtherSense(int r)
