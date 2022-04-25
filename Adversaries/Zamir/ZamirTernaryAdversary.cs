@@ -83,8 +83,8 @@ namespace AdversaryExperiments.Adversaries.Zamir
                         if (x == a)
                         {
                             Push(a, Direction.Left, Direction.Left);
-                            Push(c, Direction.Left, Direction.Right);
                             Push(b, Direction.Right);
+                            Push(c, Direction.Left, Direction.Right);
                             Push(d, Direction.Right, Direction.Right);
                             return Less;
                         }
