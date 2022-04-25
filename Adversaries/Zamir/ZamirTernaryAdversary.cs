@@ -249,7 +249,40 @@ namespace AdversaryExperiments.Adversaries.Zamir
             }
         }
 
-        private void Push(WrappedInt n, params Direction[] directions) => throw new Exception($"Handle sentinels and update the mapping");
+        private void Push(WrappedInt n, params Direction[] directions)
+        {
+            var node = GetDestination(n, directions);
+            _elementToNode[n.Value] = node;
+        }
+
+        private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) 
+        {
+            var d = GetDestination(x, directions);
+            var yNode = GetNode(y);
+            return !ExistsPath(d, yNode) && !ExistsPath(yNode, d);
+        }
+
+        private Node GetDestination(WrappedInt n, Direction[] directions)
+        {
+            var node = GetNode(n);
+            foreach (var d in directions)
+            {
+                node.EnsureInitialized();
+                switch (d)
+                {
+                    case Direction.Left:
+                        node = node.Left;
+                        break;
+                    case Direction.Right:
+                        node = node.Right;
+                        break;
+                    default:
+                        throw new Exception($"Unrecognised {nameof(Direction)}: {d}");
+                }
+            }
+
+            return node;
+        }
 
         private Node GetNode(WrappedInt v) => _elementToNode[v.Value];
 
@@ -267,9 +300,6 @@ namespace AdversaryExperiments.Adversaries.Zamir
             }
             return ExistsPath(here.Left, target) || ExistsPath(here.Right, target);
         }
-
-        private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) 
-        => throw new Exception($"Verify no directed path directions(x) -> y and no directed path y -> directions(x)");
 
         private bool TryGetPair(WrappedInt v, out (WrappedInt, WrappedInt) p) => throw new Exception("TODO2");
 
