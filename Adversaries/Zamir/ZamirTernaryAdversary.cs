@@ -16,6 +16,9 @@ namespace AdversaryExperiments.Adversaries.Zamir
             Right
         }
 
+
+        private readonly Node[] _elementToNode;
+
         public string Name { get; }
         public long NumComparisons { get; private set; }
         public List<WrappedInt> CurrentData { get; }
@@ -27,6 +30,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
             Name = "Zamir3";
             CurrentData = new List<WrappedInt>(Enumerable.Range(0, size).Select(i => new WrappedInt { Value = i }));
             _root = Node.CreateUnit();
+            _elementToNode = Enumerable.Range(0 , size).Select(_ => _root).ToArray();
         }
         
         public int Compare(WrappedInt x, WrappedInt y)
@@ -247,19 +251,22 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
         private void Push(WrappedInt n, params Direction[] directions) => throw new Exception($"Handle sentinels and update the mapping");
 
-        private static int OtherSense(int r)
-         => r switch 
-         {
-             Greater => Less,
-             Less => Greater,
-             _ => throw new Exception($"Unexpected comparison result {r}")
-         };
+        private Node GetNode(WrappedInt v) => _elementToNode[v.Value];
 
-        private Node GetNode(WrappedInt v) => throw new Exception("TODO1");
+        private bool ExistsPath(WrappedInt here, WrappedInt target) => ExistsPath(GetNode(here), GetNode(target));
 
-        private bool ExistsPath(WrappedInt x, WrappedInt y) => throw new Exception("TODO3");
-
-        private bool ExistsPath(Node x, Node y) => throw new Exception($"TODO4");
+        private bool ExistsPath(Node here, Node target)
+        {
+            if(here.Type == Node.NodeType.Sentinel)
+            {
+                return false;
+            }
+            if(here == target)
+            {
+                return true;
+            }
+            return ExistsPath(here.Left, target) || ExistsPath(here.Right, target);
+        }
 
         private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) 
         => throw new Exception($"Verify no directed path directions(x) -> y and no directed path y -> directions(x)");
@@ -275,5 +282,13 @@ namespace AdversaryExperiments.Adversaries.Zamir
         {
             throw new NotImplementedException();
         }
+        
+        private static int OtherSense(int r)
+         => r switch 
+         {
+             Greater => Less,
+             Less => Greater,
+             _ => throw new Exception($"Unexpected comparison result {r}")
+         };
     }
 }
