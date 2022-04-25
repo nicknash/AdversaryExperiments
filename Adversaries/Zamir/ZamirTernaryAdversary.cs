@@ -76,7 +76,35 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     }
                     else
                     {
-
+                        DestroyPair(xPair);
+                        DestroyPair(yPair);
+                        var (a, b) = xPair;
+                        var (c, d) = yPair;
+                        if (x == a)
+                        {
+                            Push(a, Direction.Left, Direction.Left);
+                            Push(c, Direction.Left, Direction.Right);
+                            Push(b, Direction.Right);
+                            Push(d, Direction.Right, Direction.Right);
+                            return Less;
+                        }
+                        else if (x == b && y == c)
+                        {
+                            Push(a, Direction.Left, Direction.Right);
+                            Push(b, Direction.Right, Direction.Right);
+                            Push(c, Direction.Left, Direction.Left);
+                            Push(d, Direction.Right);
+                            return Less;
+                        }
+                        else if (x == b && y == d)
+                        {
+                            // This is a not exactly symmetrical case that (right now) it looks like Zamir et al don't cover
+                            Push(a, Direction.Left, Direction.Left);
+                            Push(b, Direction.Left, Direction.Right);
+                            Push(c, Direction.Left);
+                            Push(d, Direction.Right, Direction.Right);
+                            return Less;
+                        }
                     }
                     throw new Exception($"Should never happen: Did not resolve same node comparison.");
                 }
@@ -105,7 +133,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     }
                     else
                     {
-                        // These are the 'minimal push down' case of the ancestor
+                        // In this case, the comparison is between two unpaired elements in distinct nodes.
                         var result = xIsAncestor ? PushDownSingle(x, y) : OtherSense(PushDownSingle(y, x));
                         return result;
                     }
