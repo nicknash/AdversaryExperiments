@@ -44,6 +44,19 @@ namespace AdversaryExperiments.Adversaries.Zamir
                 return Equal;
             }
 
+            var inPair = TryGetPair(x, out var pair);
+            if(inPair)
+            {
+                if(y == pair.Item2)
+                {
+                    return Less;
+                }
+                else if(y == pair.Item1)
+                {
+                    return Greater;
+                }
+            }
+
             var xIsAncestor = ExistsPath(x, y);
             var yIsAncestor = ExistsPath(y, x);
 
@@ -65,7 +78,11 @@ namespace AdversaryExperiments.Adversaries.Zamir
                 PushApart(y, x);
                 return Greater; 
             }
+            return GetExistingOrder(x, y);
+        }
 
+        private int GetExistingOrder(WrappedInt x, WrappedInt y)
+        {
             throw new NotImplementedException($"The ordering between {x.Value} and {y.Value} is already defined, but this is not implemented yet.");
         }
 
