@@ -6,11 +6,11 @@ namespace AdversaryExperiments.Adversaries.Zamir
 {
     public class ZamirTernaryAdversary : IAdversary
     {
-        private const int Equal = 0;
-        private const int Less = -1;
-        private const int Greater = 1;
+        public const int Equal = 0;
+        public const int Less = -1;
+        public const int Greater = 1;
         
-        enum Direction
+        private enum Direction
         {
             Left,
             Right
@@ -48,108 +48,130 @@ namespace AdversaryExperiments.Adversaries.Zamir
             var yIsAncestor = ExistsPath(y, x);
 
             var inSameNode = xIsAncestor && yIsAncestor;
-            var requiresClassification = xIsAncestor || yIsAncestor;
+            var areLeftRightIntermediateSiblings = GetNode(x).Right == GetNode(y).Left;
+            var areRightLeftIntermediateSiblings = GetNode(x).Left == GetNode(y).Right;
 
-            var isXPaired = TryGetPair(x, out var xPair);
-            var isYPaired = TryGetPair(y, out var yPair);
-
-            if (requiresClassification)
+            if (xIsAncestor || yIsAncestor)
             {
-                if (inSameNode)
-                {
-                    var node = GetNode(x);
-                    if(!isXPaired && !isYPaired)
-                    {
-                        switch(node.Type)
-                        {
-                            case Node.NodeType.Tree:
-                                CreatePair(x, y);
-                                return Less;
-                            case Node.NodeType.Intermediate:
-                                Push(x, Direction.Left);
-                                Push(y, Direction.Right);
-                                return Less;
-                            default:
-                                throw new Exception($"Unexpected {nameof(Node.NodeType)} {node.Type}");
-                        }
-                    }
-                    else if (!isXPaired && isYPaired)
-                    {
-                        return OtherSense(ComparePairToSingleton(yPair, y, x));
-                    }
-                    else if (isXPaired && !isYPaired)
-                    {
-                        return ComparePairToSingleton(xPair, x, y);
-                    }
-                    else
-                    {
-                        DestroyPair(xPair);
-                        DestroyPair(yPair);
-                        var (a, b) = xPair;
-                        var (c, d) = yPair;
-                        if (x == a)
-                        {
-                            Push(a, Direction.Left, Direction.Left);
-                            Push(b, Direction.Right);
-                            Push(c, Direction.Left, Direction.Right);
-                            Push(d, Direction.Right, Direction.Right);
-                            return Less;
-                        }
-                        else if (x == b && y == c)
-                        {
-                            Push(a, Direction.Left, Direction.Right);
-                            Push(b, Direction.Right, Direction.Right);
-                            Push(c, Direction.Left, Direction.Left);
-                            Push(d, Direction.Right);
-                            return Less;
-                        }
-                        else if (x == b && y == d)
-                        {
-                            // This is a not exactly symmetrical case that (right now) it looks like Zamir et al don't cover
-                            Push(a, Direction.Left, Direction.Left);
-                            Push(b, Direction.Left, Direction.Right);
-                            Push(c, Direction.Left);
-                            Push(d, Direction.Right, Direction.Right);
-                            return Less;
-                        }
-                    }
-                    throw new Exception($"Should never happen: Did not resolve same node comparison.");
-                }
-                else
-                {
-                    var isAncestorPaired = xIsAncestor && isXPaired || yIsAncestor && isYPaired;
-                    if(isAncestorPaired)
-                    {
-                        // In this case, we need to split a pair in an ancestor node.
-                        // Since pairing only occurs in tree nodes and not intermediate nodes
-                        // the ancestor with the pair must be a tree node.
-                        // Splitting a pair correctly means that at most one element of the pair
-                        // can reside at an intermediate node after this split. Otherwise, a subsequent move
-                        // could send them both to a 'central' node. That is, consider the pair (p, q): 
-                        //    (p,q)
-                        //    /   \
-                        //   I1    I2
-                        //  /  \ /  \
-                        // T1  T2   T3
-                        //
-                        // In this diagram 'T2' is a central node, and p and q could not be split to reside in I1 and I2,
-                        // because subsequent moves could conceivably send them both to T2, which is inconsistent with p < q.
-                        //
-                        var result = xIsAncestor ? PushDownPair(xPair, y) : PushDownPair(yPair, x);
-                        return result;
-                    }
-                    else
-                    {
-                        // In this case, the comparison is between two unpaired elements in distinct nodes.
-                        var result = xIsAncestor ? PushDownSingle(x, y) : OtherSense(PushDownSingle(y, x));
-                        return result;
-                    }
-                }
+                return DoAncestorClassifyingComparison(x, y, xIsAncestor, yIsAncestor, inSameNode);
             }
+            else if(areLeftRightIntermediateSiblings)
+            {
+                PushApart(x, y);
+                return Less;
+            }
+            else if(areRightLeftIntermediateSiblings)
+            {
+                PushApart(y, x);
+                return Greater; 
+            }
+
             throw new NotImplementedException($"The ordering between {x.Value} and {y.Value} is already defined, but this is not implemented yet.");
         }
 
-        private int ComparePairToSingleton((WrappedInt, WrappedInt) pair, WrappedInt x, WrappedInt y)
+        private int DoAncestorClassifyingComparison(WrappedInt x, WrappedInt y, bool xIsAncestor, bool yIsAncestor, bool inSameNode)
+        {
+            var isXPaired = TryGetPair(x, out var xPair);
+            var isYPaired = TryGetPair(y, out var yPair);
+            if (inSameNode)
+            {
+                var node = GetNode(x);
+                if (!isXPaired && !isYPaired)
+                {
+                    switch (node.Type)
+                    {
+                        case Node.NodeType.Tree:
+                            CreatePair(x, y);
+                            return Less;
+                        case Node.NodeType.Intermediate:
+                            Push(x, Direction.Left);
+                            Push(y, Direction.Right);
+                            return Less;
+                        default:
+                            throw new Exception($"Unexpected {nameof(Node.NodeType)} {node.Type}");
+                    }
+                }
+                else if (!isXPaired && isYPaired)
+                {
+                    return OtherSense(ComparePairToSingletonInSameNode(yPair, y, x));
+                }
+                else if (isXPaired && !isYPaired)
+                {
+                    return ComparePairToSingletonInSameNode(xPair, x, y);
+                }
+                else
+                {
+                    DestroyPair(xPair);
+                    DestroyPair(yPair);
+                    var (a, b) = xPair;
+                    var (c, d) = yPair;
+                    if (x == a)
+                    {
+                        Push(a, Direction.Left, Direction.Left);
+                        Push(b, Direction.Right);
+                        Push(c, Direction.Left, Direction.Right);
+                        Push(d, Direction.Right, Direction.Right);
+                        return Less;
+                    }
+                    else if (x == b && y == c)
+                    {
+                        Push(a, Direction.Left, Direction.Right);
+                        Push(b, Direction.Right, Direction.Right);
+                        Push(c, Direction.Left, Direction.Left);
+                        Push(d, Direction.Right);
+                        return Less;
+                    }
+                    else if (x == b && y == d)
+                    {
+                        // This is a not exactly symmetrical case that (right now) it looks like Zamir et al don't cover
+                        Push(a, Direction.Left, Direction.Left);
+                        Push(b, Direction.Left, Direction.Right);
+                        Push(c, Direction.Left);
+                        Push(d, Direction.Right, Direction.Right);
+                        return Less;
+                    }
+                }
+                throw new Exception($"Should never happen: Did not resolve same node comparison.");
+            }
+            else
+            {
+                var isAncestorPaired = xIsAncestor && isXPaired || yIsAncestor && isYPaired;
+                if (isAncestorPaired)
+                {
+                    // In this case, we need to split a pair in an ancestor node.
+                    // Since pairing only occurs in tree nodes and not intermediate nodes
+                    // the ancestor with the pair must be a tree node.
+                    // Splitting a pair correctly means that at most one element of the pair
+                    // can reside at an intermediate node after this split. Otherwise, a subsequent move
+                    // could send them both to a 'central' node. That is, consider the pair (p, q): 
+                    //    (p,q)
+                    //    /   \
+                    //   I1    I2
+                    //  /  \ /  \
+                    // T1  T2   T3
+                    //
+                    // In this diagram 'T2' is a central node, and p and q could not be split to reside in I1 and I2,
+                    // because subsequent moves could conceivably send them both to T2, which is inconsistent with p < q.
+                    //
+                    var result = xIsAncestor ? PushDownPair(xPair, y) : PushDownPair(yPair, x);
+                    return result;
+                }
+                else
+                {
+                    // In this case, the comparison is between two unpaired elements in distinct nodes.
+                    var result = xIsAncestor ? PushDownSingle(x, y) : OtherSense(PushDownSingle(y, x));
+                    return result;
+                }
+            }
+        }
+
+        private void PushApart(WrappedInt a, WrappedInt b)
+        {
+            Push(a, Direction.Left);
+            Push(b, Direction.Right);
+        }
+
+        private int ComparePairToSingletonInSameNode((WrappedInt, WrappedInt) pair, WrappedInt x, WrappedInt y)
         {
             DestroyPair(pair);
             var (p, q) = pair;
