@@ -61,8 +61,10 @@ namespace AdversaryExperiments.Adversaries.Zamir
             var yIsAncestor = ExistsPath(y, x);
 
             var inSameNode = xIsAncestor && yIsAncestor;
-            var areLeftRightIntermediateSiblings = GetNode(x).Right == GetNode(y).Left;
-            var areRightLeftIntermediateSiblings = GetNode(x).Left == GetNode(y).Right;
+            var xNode = GetNode(x);
+            var yNode = GetNode(y);
+            var areLeftRightIntermediateSiblings = xNode.Right == yNode.Left;
+            var areRightLeftIntermediateSiblings = xNode.Left == yNode.Right;
 
             if (xIsAncestor || yIsAncestor)
             {
@@ -78,13 +80,20 @@ namespace AdversaryExperiments.Adversaries.Zamir
                 PushApart(y, x);
                 return Greater; 
             }
-            return GetExistingOrder(x, y);
+            foreach(var node in OrderedTraversal.Traverse(_root))
+            {
+                if(node == xNode)
+                {
+                    return Less;
+                }
+                if(node == yNode)
+                {
+                    return Greater;
+                }
+            }
+            throw new Exception($"Should never happen: Couldn't determine order.");
         }
 
-        private int GetExistingOrder(WrappedInt x, WrappedInt y)
-        {
-            throw new NotImplementedException($"The ordering between {x.Value} and {y.Value} is already defined, but this is not implemented yet.");
-        }
 
         private int DoAncestorClassifyingComparison(WrappedInt x, WrappedInt y, bool xIsAncestor, bool yIsAncestor, bool inSameNode)
         {
@@ -270,9 +279,9 @@ namespace AdversaryExperiments.Adversaries.Zamir
                 PushAncestor(Direction.Left);
                 return Less;
             }
-            else if(CanPushAncestor(Direction.Right))
+            else if(CanPushAncestor(Direction.Right)) 
             {
-                PushAncestor(Direction.Right);
+                PushAncestor(Direction.Right); 
                 return Greater;
             }
             else
@@ -299,9 +308,10 @@ namespace AdversaryExperiments.Adversaries.Zamir
 
         private bool CanPush(WrappedInt x, WrappedInt y, params Direction[] directions) 
         {
-            var d = GetDestination(x, directions);
+            var destinationNode = GetDestination(x, directions);
             var yNode = GetNode(y);
-            return !ExistsPath(d, yNode) && !ExistsPath(yNode, d);
+            var areSiblingIntermediateNodes = destinationNode.Right == yNode.Left || yNode.Right == destinationNode.Left;
+            return !areSiblingIntermediateNodes && !ExistsPath(destinationNode, yNode) && !ExistsPath(yNode, destinationNode);
         }
 
         private Node GetDestination(WrappedInt n, Direction[] directions)
