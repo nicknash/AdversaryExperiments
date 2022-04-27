@@ -170,7 +170,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     // Splitting a pair correctly means that at most one element of the pair
                     // can reside at an intermediate node after this split. Otherwise, a subsequent move
                     // could send them both to a 'central' node. That is, consider the pair (p, q): 
-                    //    (p,q)
+                    //    (p<q)
                     //    /   \
                     //   I1    I2
                     //  /  \ /  \
@@ -179,7 +179,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     // In this diagram 'T2' is a central node, and p and q could not be split to reside in I1 and I2,
                     // because subsequent moves could conceivably send them both to T2, which is inconsistent with p < q.
                     //
-                    var result = xIsAncestor ? PushDownPair(xPair, y) : PushDownPair(yPair, x);
+                    var result = xIsAncestor ? PushDownPair(x, y) : OtherSense(PushDownPair(y, x));
                     return result;
                 }
                 else
@@ -218,53 +218,163 @@ namespace AdversaryExperiments.Adversaries.Zamir
             throw new Exception($"Should never happen: exhaustiveness check on pairing");
         }
 
-        private int PushDownPair((WrappedInt, WrappedInt) pairInAncestor, WrappedInt descendant)
+        private int PushDownPair(WrappedInt pairElement, WrappedInt descendant) 
         {
+            if(!TryGetPair(pairElement, out var pairInAncestor))
+            {
+                throw new Exception($"Should never happen: {pairElement} is not a paired element");
+            }
             DestroyPair(pairInAncestor);
             var (p, q) = pairInAncestor;
-            //    (p,q)
+            //    (p<q)
             //    /   \
             //   I1    I2
             //  /  \ /  \
             // T1  T2   T3
             //
-            // The potential consistent destinations of p and q with respect to descendant are
-            //
-            // p in  | q in | description 
-            // ------|------|
-            //  I1   |  T3  | p left once, q right twice
-            //  T1   |  T2  | p left twice, q right-then-left
-            //  T1   |  I2  | p left twice, q right once
-            //  T1   |  T3  | p left twice, q right twice
-            //  T2   |  T3  | p left-right, q right twice
-            //
-            bool CanPushP(params Direction[] where) => CanPush(p, descendant, where);
-            bool CanPushQ(params Direction[] where) => CanPush(q, descendant, where);
+            // There are 5 cases to deal with in comparisons here, depending on whether the descendant is in the node
+            // I1, I2 or the sub-trees rooted at T1, T2, T3
+            // For each of those 5 cases, there are 2 sub-cases, corresponding to whether the descendant is compared to 
+            // the first or second element of the pair. 
 
-            if(CanPushP(Direction.Left) && CanPushQ(Direction.Right, Direction.Right))
+            var descendantNode = GetNode(descendant);
+            var pairNode = GetNode(p);
+            if(pairNode.Left == descendantNode)
             {
-                Push(p, Direction.Left);
-                Push(q, Direction.Right, Direction.Right);
+                if(p == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   d      *    ----->   *    q
+                    //  /  \  /   \          / \  /  \
+                    // *    *      *        p   d     *
+                    // Is p < d ? Yes => Less
+                    Push(p, Direction.Left, Direction.Left);
+                    Push(descendant, Direction.Right);
+                    Push(q, Direction.Right);
+                    return Less;
+                }
+                else if(q == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   d      *    ----->  p,d    *
+                    //  /  \  /   \          / \  /   \
+                    // *    *      *        *    *     q
+                    // Is q < d ? No => Greater
+                    Push(p, Direction.Left);
+                    Push(q, Direction.Right, Direction.Right);
+                    return Greater;
+                }
+            } 
+            else if(pairNode.Right == descendantNode)
+            {
+                if(p == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      d    ----->   *    q,d
+                    //  /  \  /   \          / \  /  \
+                    // *    *      *        p    *    *
+                    // Is p < d ? Yes => Less
+                    Push(p, Direction.Left, Direction.Left);
+                    Push(q, Direction.Right);
+                    return Less;
+                }
+                else if(q == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      d    ----->   p     *
+                    //  /  \  /   \          / \  /  \
+                    // *    *      *        *    d    q
+                    // Is q < d ? No => Greater
+                    Push(p, Direction.Left);
+                    Push(descendant, Direction.Left);
+                    Push(q, Direction.Right, Direction.Right);
+                    return Greater;
+                }
             }
-            else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right, Direction.Left))
+            else if(ExistsPath(pairNode.Left.Left, descendantNode))
             {
-                Push(p, Direction.Left, Direction.Left);
-                Push(q, Direction.Right, Direction.Left);
+                if (p == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      *    ----->   *     *
+                    //  /  \  /   \          / \  /  \
+                    // d    *      *        d    p    q
+                    // Is p < d ? No => Greater
+                    Push(p, Direction.Left, Direction.Right);
+                    Push(q, Direction.Right, Direction.Right);
+                    return Greater;
+                }
+                else if(q == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      *    ----->   p     *
+                    //  /  \  /   \          / \  /  \
+                    // d    *      *        d    *    q
+                    // Is q < d ? No => Greater
+                    Push(p, Direction.Left);
+                    Push(q, Direction.Right, Direction.Right);
+                    return Greater;
+                }
             }
-            else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right))
+            else if(ExistsPath(pairNode.Left.Right, descendantNode))
             {
-                Push(p, Direction.Left, Direction.Left);
-                Push(q, Direction.Right);
-            }           
-            else if(CanPushP(Direction.Left, Direction.Left) && CanPushQ(Direction.Right, Direction.Right))
-            {
-                Push(p, Direction.Left, Direction.Left);
-                Push(q, Direction.Right, Direction.Right);
+                if (p == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      *    ----->   *     q
+                    //  /  \  /   \          / \  /  \
+                    // *    d      *        p    d    *
+                    // Is p < d ? Yes => Less
+                    Push(p, Direction.Left, Direction.Left);
+                    Push(q, Direction.Right);
+                    return Less;
+                }
+                else if(q == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      *    ----->   p     *
+                    //  /  \  /   \          / \  /  \
+                    // *    d      *        *    d    q
+                    // Is q < d ? No => Greater
+                    Push(p, Direction.Left);
+                    Push(q, Direction.Right, Direction.Right);
+                    return Greater;
+                }
             }
-            else if(CanPushP(Direction.Left, Direction.Right) && CanPushQ(Direction.Right, Direction.Right))
+            else if(ExistsPath(pairNode.Right.Right, descendantNode))
             {
-                Push(p, Direction.Left, Direction.Right);
-                Push(q, Direction.Right, Direction.Right);
+                if(p == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      *    ----->   *     q
+                    //  /  \  /   \          / \  /  \
+                    // *     *     d        p    *    d
+                    // Is p < d ? Yes => Less
+                    Push(p, Direction.Left, Direction.Left);
+                    Push(q, Direction.Right);
+                    return Less;
+                }
+                else if(q == pairElement)
+                {
+                    //    (p<q)                  *
+                    //    /     \              /   \
+                    //   *      *    ----->   *     *
+                    //  /  \  /   \          / \  /  \
+                    // *     *     d        p    q    d
+                    // Is q < d ? Yes => Less
+                    Push(p, Direction.Left, Direction.Left);
+                    Push(q, Direction.Left, Direction.Right);
+                    return Less;
+                }
             }
             throw new Exception($"Should never happen: Cannot resolve order when splitting ancestor pair");
         }
@@ -319,7 +429,6 @@ namespace AdversaryExperiments.Adversaries.Zamir
             var node = GetNode(n);
             foreach (var d in directions)
             {
-                node.EnsureInitialized();
                 switch (d)
                 {
                     case Direction.Left:
@@ -331,8 +440,8 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     default:
                         throw new Exception($"Unrecognised {nameof(Direction)}: {d}");
                 }
+                node.EnsureInitialized();
             }
-
             return node;
         }
 

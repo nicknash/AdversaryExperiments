@@ -76,18 +76,21 @@ namespace AdversaryExperiments.Adversaries.Zamir
             Assert.That(result, Is.EqualTo(expected));
         }
 
-        [TestCase(4, ZamirTernaryAdversary.Less)]
-        [TestCase(5, ZamirTernaryAdversary.Greater)]
-        public void Compare_IntermediateNodeToPairElementInAncestor_ReturnsExpected(int which, int expected)
+        [Test]
+        public void Compare_IntermediateNodeToPairElementInAncestor_ReturnsExpected()
         {
             Compare(0, 1);
             Compare(2, 3);
             Compare(4, 5);
+            Compare(1, 3); // This splits the pairs (0, 1), (2, 3) sending 2 to the left node of the root, resulting in this layout:
+            //       (4<5)               ()
+            //      /    \             /    \
+            //     2      *   ----->  4      *
+            //   /   \  /   \        /  \  /   \
+            //  0      1     3     (0,4)  2   (3,5) 
+            var result = Compare(2, 4); // This compares 2 which is in an intermediate node to a pair in the ancestor, shown on the right above.
 
-            Compare(1, 3); // This splits the pairs (0, 1), (2, 3) sending 2 to the left node of the root
-            var result = Compare(2, which); // This compares 2 which is in an intermediate node to a pair in the ancestor..should blow up right now!
-
-            Assert.That(result, Is.EqualTo(expected));
+            Assert.That(result, Is.EqualTo(ZamirTernaryAdversary.Greater));
         }
 
 
