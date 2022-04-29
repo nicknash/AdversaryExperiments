@@ -15,7 +15,7 @@
             Tree,
             Intermediate
         }
-        
+
         public Node Left { get; private set; }
         public Node Right { get; private set; }
         
@@ -36,14 +36,30 @@
             return root;
         }
 
-        public void EnsureInitialized()
+        public void EnsureInitialized(Node parent)
         {
             if(Type != NodeType.Sentinel)
             {
                 return;
             }
-            Type = NodeType.Tree;
-            (Left, Right) = CreateIntermediateNodes();
+            if(parent.Left != this && parent.Right != this)
+            {
+                throw new System.Exception($"{nameof(parent)} is not the parent of this node");
+            }
+            var (left, right) = (parent.Left, parent.Right); // This node is either left or right
+            if(left.Type != NodeType.Sentinel && right.Type != NodeType.Sentinel)
+            {
+                throw new System.Exception($"Both children are not currently sentinels");
+            }
+            var child0 = CreateFinalLevel();
+            var child1 = CreateFinalLevel();
+            var child2 = CreateFinalLevel();
+
+            left.Type = right.Type = NodeType.Intermediate;
+            left.Left = child0;
+            left.Right = child1;
+            right.Left = child1;
+            right.Right = child2;
         }
 
         private static (Node, Node) CreateIntermediateNodes()

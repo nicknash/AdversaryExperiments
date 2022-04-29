@@ -14,10 +14,10 @@ namespace AdversaryExperiments.Adversaries.Zamir
             var x = Node.CreateUnit();
             var extraLeft = x.Left.Left.Left;
             var extraRight = x.Right.Right.Right;
-            extraLeft.EnsureInitialized();
-            extraRight.EnsureInitialized();
+            extraLeft.EnsureInitialized(x.Left.Left);
+            extraRight.EnsureInitialized(x.Right.Right);
 
-            var expectedNodes = new[]{GetUnitTraversal(extraLeft), new[]{x.Left.Left, x.Left, x.Left.Right, x, x.Right, x.Right.Right}, GetUnitTraversal(extraRight)}.SelectMany(x => x).ToList();
+            var expectedNodes = new[]{GetUnitTraversal(x.Left.Left), new[]{x.Left, x.Left.Right, x, x.Right}, GetUnitTraversal(x.Right.Right)}.SelectMany(x => x).ToList();
             var nodeToLabel = Enumerable.Range(0, expectedNodes.Count).Select(i => (expectedNodes[i], (char) (i + 'A'))).ToDictionary(n => n.Item1, n => n.Item2);
 
 
