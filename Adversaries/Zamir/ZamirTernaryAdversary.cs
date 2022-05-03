@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace AdversaryExperiments.Adversaries.Zamir
 {
+    // This is the adversary from: 
+    // Kaplan, Zamir, Zwick, "A sort of an adversary", Proceedings of the Thirtieth Annual {ACM-SIAM} Symposium on Discrete
+    // Algorithms, {SODA} 2019, San Diego, California, USA, January 6-9, 2019 
     public class ZamirTernaryAdversary : IAdversary
     {
         public const int Equal = 0;
@@ -236,6 +239,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
             // I1, I2 or the sub-trees rooted at T1, T2, T3
             // For each of those 5 cases, there are 2 sub-cases, corresponding to whether the descendant is compared to 
             // the first or second element of the pair. 
+            
 
             var descendantNode = GetNode(descendant);
             var pairNode = GetNode(p);
@@ -429,6 +433,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
             var node = GetNode(n);
             foreach (var d in directions)
             {
+                var parent = node;
                 switch (d)
                 {
                     case Direction.Left:
@@ -440,7 +445,7 @@ namespace AdversaryExperiments.Adversaries.Zamir
                     default:
                         throw new Exception($"Unrecognised {nameof(Direction)}: {d}");
                 }
-                node.EnsureInitialized();
+                node.EnsureInitialized(parent);
             }
             return node;
         }
