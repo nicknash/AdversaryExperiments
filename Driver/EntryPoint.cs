@@ -21,6 +21,7 @@ namespace AdversaryExperiments.Driver
             var sorts = new (Action<IAdversary>, string)[]
             {
                 (adv => adv.CurrentData.Sort(adv.Compare), "List.Sort"), 
+                // (InsertionSort, "InsertionSort"), // Desc adversary insanely slow for this 
                 (TreeSort, "TreeSort")
             };
             for (int i = 0; i <= cmdLine.NumIncrements; ++i)
@@ -46,6 +47,36 @@ namespace AdversaryExperiments.Driver
             foreach (var d in adversary.CurrentData)
             {
                 tree.Add(d);
+            }
+        }
+
+        private static void InsertionSort(IAdversary adversary)
+        {
+            var minIdx = 0;
+            var data = adversary.CurrentData;
+            var compare = adversary.Compare;
+            var n = adversary.CurrentData.Count;
+            for(int i = 1; i < n; ++i)
+            {
+                if(compare(data[i], data[minIdx]) < 0)
+                {
+                    minIdx = i;
+                }
+            }
+            var tmp = data[0];
+            data[0] = data[minIdx];
+            data[minIdx] = tmp;
+
+            for(int j = 2; j < n; ++j)
+            {
+                var here = data[j];
+                int k = j;
+                while(compare(here, data[k - 1]) < 0)
+                {
+                    data[k] = data[k - 1];
+                    --k;
+                }
+                data[k] = here;
             }
         }
     }
