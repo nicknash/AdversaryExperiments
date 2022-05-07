@@ -30,7 +30,7 @@ namespace AdversaryExperiments.Driver
                 var sw = new Stopwatch();
                 foreach (var s in sorts)
                 {
-                    var adversaries = new IAdversary[] { new RandomAdversary(dataSize), new BrodalAdversary(dataSize), new ZamirTernaryAdversary(dataSize), new DescendantsAdversary(dataSize), new McIlroyKiller(dataSize) };
+                    var adversaries = new IAdversary[] { new RandomAdversary(dataSize), new BrodalAdversary(dataSize), new ZamirTernaryAdversary(dataSize), new ClosureAdversary(dataSize), new DescendantsAdversary(dataSize), new McIlroyKiller(dataSize) };
                     foreach (var adv in adversaries)
                     {
                         sw.Restart();
